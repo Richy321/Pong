@@ -5,13 +5,14 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameMode.h"
 #include "SidesEnum.h"
+#include "GameTypesEnum.h"
+#include "GameFramework/PlayerStart.h"
+#include "PongSpawnPoint.h"
 #include "PongGameMode.generated.h"
 
 /**
  * 
  */
-class APhysicsBall;
-class ACameraActor;
 
 UCLASS()
 class PONG_API APongGameMode : public AGameMode
@@ -21,23 +22,25 @@ public:
 	APongGameMode();
 
 	UFUNCTION(BlueprintCallable)
-	void Init(ACameraActor* mainCamera, FVector halfwayLineStart, FVector halfwayLineEnd);
+	void Init(class ACameraActor* mainCamera, FVector halfwayLineStart, FVector halfwayLineEnd);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<AActor> BallClass;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSubclassOf<AActor> PlayerPawnClass;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSubclassOf<AActor> AIPawnClass;
+	TSubclassOf<APawn> AIPawnClass;
 		
 	UFUNCTION(BlueprintCallable)
-		AActor* SpawnBall(ESides spawnSide);
-
-	//UFUNCTION(BlueprintCallable)
-	//void SpawnPlayer(int spawnIndex);
+	AActor* SpawnBall();
 
 	UFUNCTION(BlueprintCallable)
-	void SpawnAI();
+	void ResetBall(AActor* ball, ESides spawnSide);
+
+	UFUNCTION(BlueprintCallable)
+	void SpawnAI(ESides side);
+
+	UFUNCTION(BlueprintCallable)
+	AActor* GetBall();
 
 	bool ReadyToStartMatch_Implementation() override;
 	bool ReadyToEndMatch_Implementation() override;
@@ -52,15 +55,24 @@ public:
 	FVector spawnLineStart;
 	UPROPERTY(BlueprintReadOnly)
 	FVector spawnLineEnd;
-	UPROPERTY(BlueprintReadOnly)
-	ACameraActor* mainCamera;
 
 	AActor* ChoosePlayerStart_Implementation(AController* Player) override;
-	//AActor* FindPlayerStart_Implementation(AController* Player, const FString& IncomingName = TEXT("")) override;
 
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	EGameType GameType = EGameType::OneVsOne;
 
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	EMultiplayerGameType MultiplayerGameType = EMultiplayerGameType::SinglePlayer;
+
+	APlayerStart* GetFreePlayerStart(EGameType gameType, ESides side);
+
+	UFUNCTION(BlueprintCallable)
+	void StartGame();
+	
 private:
 	UPROPERTY()
-	APhysicsBall* ball;
+	class APhysicsBall* ball;
 	bool CheckWinState(ESides &side);
+
+	TArray<FPongSpawnPoint> SpawnPoints;
 };

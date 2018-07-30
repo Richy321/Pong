@@ -75,3 +75,4 @@ Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+enc_temp_folder/815c6a8bed6ae17cacd5f568bd74cb5/PongGameMode.cpp

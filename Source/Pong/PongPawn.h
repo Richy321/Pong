@@ -30,7 +30,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable)
-		void VerticalMovement(float Delta);
+		void VerticalMovement(float MovementDelta);
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 		float MovementSpeed = 5.0f;

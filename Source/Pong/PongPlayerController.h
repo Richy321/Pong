@@ -15,4 +15,17 @@ class PONG_API APongPlayerController : public APlayerController
 	
 public:
 	APongPlayerController();
+
+	void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable)
+		void VerticalMovement(float MovementDelta);
+
+	UFUNCTION(Server, Unreliable, WithValidation, BlueprintCallable)
+		void ServerVerticalMovement(float MovementDelta);
+
+	UFUNCTION(NetMulticast, Unreliable)
+		void BroadcastVerticalMovement(float MovementDelta);
+
+	void SetupInputComponent() override;
 };

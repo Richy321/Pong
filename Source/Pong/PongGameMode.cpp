@@ -5,6 +5,8 @@
 #include "Camera/CameraActor.h"
 #include "Classes/Kismet/GameplayStatics.h"
 #include "Classes/GameFramework/PlayerStart.h"
+#include "Runtime/AIModule/Classes/AIController.h"
+
 #include "Runtime/Engine/Public/EngineUtils.h"
 
 #include "PongBlueprintFunctionLibrary.h"
@@ -14,73 +16,87 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "PhysicsBall.h"
 
+
+
+#include "Runtime/AIModule/Classes/Blueprint/AIBlueprintHelperLibrary.h"
+#include "PongSpawnPoint.h"
+#include "PongPlayerStart.h"
+#include "PongAIController.h"
+
 APongGameMode::APongGameMode()
 {
 
 }
 
-AActor* APongGameMode::SpawnBall(ESides spawnSide)
+void APongGameMode::ResetBall(AActor* ball, ESides spawnSide)
+{
+	//pick random point along line
+	FVector spawnPoint;
+
+	float randF = FMath::RandRange(0.0f, 1.0f);
+	FVector line = (spawnLineEnd - spawnLineStart);
+	line = spawnLineStart + (line * randF);
+
+	float direction = 0.0f;
+	switch (spawnSide)
+	{
+	case ESides::None:
+		direction = FMath::RandRange(0, 1);
+		break;
+	case ESides::Left:
+		direction = 0;
+		break;
+	case ESides::Right:
+		direction = 1;
+		break;
+	}
+	ball->SetActorLocation(line);
+	UActorComponent* actorComponent = ball->GetComponentByClass(UProjectileMovementComponent::StaticClass());
+	if (IsValid(actorComponent))
+	{
+		UProjectileMovementComponent* projectileComponent = Cast<UProjectileMovementComponent>(actorComponent);
+		if (IsValid(projectileComponent))
+		{
+			projectileComponent->Velocity = FVector(0.0f, projectileComponent->InitialSpeed * (direction == 0 ? -1.0 : 1.0f), 0.0f);
+		}
+	}
+}
+
+AActor* APongGameMode::SpawnBall()
 {
 	if (IsValid(BallClass))
 	{
-		//pick random point along line
-		FVector spawnPoint;
-
-		float randF = FMath::RandRange(0.0f, 1.0f);
-		FVector line = (spawnLineEnd - spawnLineStart);
-		line = spawnLineStart + (line * randF);
-
-		float direction = 0.0f;
-		switch (spawnSide)
+		if (!IsValid(ball))
 		{
-		case ESides::None:
-			direction = FMath::RandRange(0, 1);
-			break;
-		case ESides::Left:
-			direction = 0;
-			break;
-		case ESides::Right:
-			direction = 1;
-			break;
+			ball = Cast<APhysicsBall>(GetWorld()->SpawnActor(BallClass));
 		}
-
-		ball = Cast<APhysicsBall>(GetWorld()->SpawnActor(BallClass, &line));
-		UActorComponent* actorComponent = ball->GetComponentByClass(UProjectileMovementComponent::StaticClass());
-		if (IsValid(actorComponent))
-		{
-			UProjectileMovementComponent* projectileComponent = Cast<UProjectileMovementComponent>(actorComponent);
-			
-			projectileComponent->Velocity = FVector(0.0f, projectileComponent->InitialSpeed * (direction == 0 ? -1.0 : 1.0f), 0.0f);
-		}
+		return ball;
 	}
 
 	//log
 	return nullptr;
 }
 
-//void APongGameModeBase::SpawnPlayer(int spawnIndex)
-//{
-//	if (IsValid(PlayerPawnClass))
-//	{
-//		if (PaddleSpawnPoints.IsValidIndex(spawnIndex))
-//		{
-//			FVector location = PaddleSpawnPoints[spawnIndex].GetLocation();
-//			AActor* actor = GetWorld()->SpawnActor(PlayerPawnClass, &BallSpawnPoint);
-//
-//
-//		}
-//		else
-//		{
-//			//log
-//		}
-//	}
-//}
-
-void APongGameMode::SpawnAI()
+void APongGameMode::SpawnAI(ESides side)
 {
 	if (IsValid(AIPawnClass))
 	{
+		APlayerStart* start = GetFreePlayerStart(GameType, side);
+		if (IsValid(start))
+		{
+			APawn* pawn = UAIBlueprintHelperLibrary::SpawnAIFromClass(GetWorld(), AIPawnClass, nullptr, start->GetActorLocation(), start->GetActorRotation());
 
+			FVector location = pawn->GetActorLocation();
+			if (IsValid(pawn->GetController()))
+			{
+				APongAIController* AIController = Cast<APongAIController>(pawn->GetController());
+				if (IsValid(AIController))
+				{
+					//AIController->UseBlackboard()
+				}
+			}
+
+		}
 	}
 	else
 	{
@@ -88,10 +104,15 @@ void APongGameMode::SpawnAI()
 	}
 }
 
-
 void APongGameMode::IncrementScore(ESides side)
 {
-	APongGameState* pongState = UPongBlueprintFunctionLibrary::GetPongGameState(GetWorld());
+	UWorld* world = GetWorld();
+	if (!IsValid(world))
+	{
+		return;
+	}
+		
+	APongGameState* pongState = UPongBlueprintFunctionLibrary::GetPongGameState(world);
 	if (IsValid(pongState))
 	{
 		pongState->IncrementScore(side);
@@ -112,7 +133,7 @@ void APongGameMode::IncrementScore(ESides side)
 			serveSide = ESides::Left;
 		}
 
-		SpawnBall(serveSide);
+		ResetBall(ball, serveSide);
 	}
 }
 
@@ -143,18 +164,20 @@ void APongGameMode::Init(ACameraActor* camera, FVector halfwayLineStart, FVector
 	
 	spawnLineStart = halfwayLineStart;
 	spawnLineEnd = halfwayLineEnd;
-	mainCamera = camera;
+	APongGameState* pongState = UPongBlueprintFunctionLibrary::GetPongGameState(this);
+	pongState->mainCamera = camera;
+
 
 	//Set main camera as players view 
-	UPongGameInstance* gameInstance = UPongBlueprintFunctionLibrary::GetPongGameInstance(GetWorld());
-	if (IsValid(gameInstance))
-	{
-		APongPlayerController* pc = gameInstance->GetPrimaryPlayerController();
-		if (IsValid(pc))
-		{
-			pc->SetViewTarget(camera);
-		}
-	}
+	//UPongGameInstance* gameInstance = UPongBlueprintFunctionLibrary::GetPongGameInstance(GetWorld());
+	//if (IsValid(gameInstance))
+	//{
+	//	APongPlayerController* pc = gameInstance->GetPrimaryPlayerController();
+	//	if (IsValid(pc))
+	//	{
+	//		pc->SetViewTarget(camera);
+	//	}
+	//}
 }
 
 
@@ -172,50 +195,61 @@ bool APongGameMode::ReadyToEndMatch_Implementation()
 {
 	return false;
 }
+
 PRAGMA_DISABLE_OPTIMIZATION
 AActor* APongGameMode::ChoosePlayerStart_Implementation(AController* Player)
 {
-	UClass* PawnClass = GetDefaultPawnClassForController(Player);
-	APawn* PawnToFit = PawnClass ? PawnClass->GetDefaultObject<APawn>() : nullptr;
-	TArray<APlayerStart*> UnOccupiedStartPoints;
-	TArray<APlayerStart*> OccupiedStartPoints;
+	//TODO - tie into lobby
 
-	for (TActorIterator<APlayerStart> It(GetWorld()); It; ++It)
+	//Force Left player as PC and right as AI for time being
+
+	if (Player->IsA(APlayerController::StaticClass()))
 	{
-		APlayerStart* PlayerStart = *It;
-		FVector ActorLocation = PlayerStart->GetActorLocation();
-		const FRotator ActorRotation = PlayerStart->GetActorRotation();
-
-		if (!GetWorld()->EncroachingBlockingGeometry(PawnToFit, ActorLocation, ActorRotation))
+		//Try to take the left spot
+		APlayerStart* start = GetFreePlayerStart(GameType, ESides::Left);
+		if (!start)
 		{
-			UnOccupiedStartPoints.Add(PlayerStart);
+			//if not available try the right
+			start = GetFreePlayerStart(GameType, ESides::Right);
 		}
-		else if (GetWorld()->FindTeleportSpot(PawnToFit, ActorLocation, ActorRotation))
-		{
-			OccupiedStartPoints.Add(PlayerStart);
-		}
+		return start;
+	}
+	else if (Player->IsA(AAIController::StaticClass()))
+	{
+		return GetFreePlayerStart(GameType, ESides::Right);
 	}
 
-	if (UnOccupiedStartPoints.Num() > 0)
-	{
-		//TODO - handle spawn position properly.
-		for (auto startPoint : UnOccupiedStartPoints)
-		{
-			const FName LeftPlayerStartTag = FName("Left");
-
-			if (startPoint->PlayerStartTag == LeftPlayerStartTag)
-			{
-				return startPoint;
-			}
-		}
-
-		return UnOccupiedStartPoints[FMath::RandRange(0, UnOccupiedStartPoints.Num() - 1)];
-	}
-	else if (OccupiedStartPoints.Num() > 0)
-	{
-		return OccupiedStartPoints[FMath::RandRange(0, OccupiedStartPoints.Num() - 1)];
-	}
-	
 	return nullptr;
 }
 PRAGMA_ENABLE_OPTIMIZATION
+
+APlayerStart* APongGameMode::GetFreePlayerStart(EGameType gameType, ESides side)
+{
+	for (TActorIterator<APongPlayerStart> It(GetWorld()); It; ++It)
+	{
+		
+		if (!It->bInUse && It->GameType == gameType && It->Side == side)
+		{
+			It->bInUse = true;
+			return *It;
+		}
+	}
+	return nullptr;
+}
+
+AActor* APongGameMode::GetBall()
+{
+	return ball;
+}
+
+void APongGameMode::StartGame()
+{
+	//Spawn bots
+	if (MultiplayerGameType == EMultiplayerGameType::SinglePlayer)
+	{
+		SpawnAI(ESides::Right);
+	}
+
+	AActor* newBall = SpawnBall();
+	ResetBall(newBall, ESides::None);
+}

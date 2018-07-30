@@ -3,6 +3,7 @@
 #include "PongGameState.h"
 #include "PongBlueprintFunctionLibrary.h"
 #include "PongHUD.h"
+#include "UnrealNetwork.h"
 
 APongGameState::APongGameState()
 {
@@ -36,4 +37,11 @@ void APongGameState::BeginPlay()
 	{
 
 	}
+}
+
+void APongGameState::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APongGameState, mainCamera);
 }

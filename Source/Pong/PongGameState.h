@@ -42,6 +42,12 @@ public:
 
 	void BeginPlay() override;
 
+	UPROPERTY(BlueprintReadOnly, replicated)
+		ACameraActor* mainCamera;
+
+	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
+
+
 private:
 	TMap<ESides, int> scoreboard;
 };

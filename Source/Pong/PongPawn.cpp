@@ -6,12 +6,16 @@
 #include "Runtime/Engine/Classes/Curves/CurveFloat.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "PhysicsBall.h"
+#include "Runtime/Engine/Classes/Engine/World.h"
 
 // Sets default values
 APongPawn::APongPawn()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	
+	SetReplicateMovement(true);
+	SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
@@ -43,9 +47,9 @@ void APongPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
-void APongPawn::VerticalMovement(float Delta)
+void APongPawn::VerticalMovement(float MovementDelta)
 {
-	AddActorLocalOffset(FVector(0.0f, 0.0f, Delta * MovementSpeed), true);
+	AddActorLocalOffset(FVector(0.0f, 0.0f, GetWorld()->GetDeltaSeconds() * MovementDelta * MovementSpeed), true);
 }
 
 PRAGMA_DISABLE_OPTIMIZATION
