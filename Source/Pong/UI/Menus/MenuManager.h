@@ -19,6 +19,11 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void GoToScreen(EMenuScreens Screen);
+
+	void HandleMovement(float DeltaMovement);
+	void HandleSelect();
+	void HandleBack();
+
 protected:
 	UPROPERTY(EditAnywhere)
 	TMap<EMenuScreens, TSubclassOf<UMenuScreenWidget>> ScreenClasses;

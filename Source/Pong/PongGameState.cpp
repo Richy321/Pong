@@ -33,6 +33,12 @@ void APongGameState::IncrementScore(ESides Side)
 
 void APongGameState::BeginPlay()
 {
+	UPongGameInstance* PongGameInstance = UPongBlueprintFunctionLibrary::GetPongGameInstance(GetWorld());
+	if (IsValid(PongGameInstance))
+	{
+		PongGameInstance->SetAppState(EAppState::Game);
+	}
+	Super::BeginPlay();
 }
 
 void APongGameState::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
@@ -91,4 +97,14 @@ void APongGameState::Pause()
 void APongGameState::UnPause()
 {
 	state = EGameState::InGame;
+}
+
+void APongGameState::ResetScore()
+{
+	//Only let the server reset the score
+	if (HasAuthority())
+	{
+		Score.ScoreLeft = 0;
+		Score.ScoreRight = 0;
+	}
 }

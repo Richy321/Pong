@@ -15,6 +15,9 @@ public:
 		static class APongHUD* GetPongHUD(const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintPure, Category = "Util", meta = (WorldContext = "WorldContextObject"))
+		static class APongLobbyHUD* GetPongLobbyHUD(const UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintPure, Category = "Util", meta = (WorldContext = "WorldContextObject"))
 		static class UPongGameInstance* GetPongGameInstance(const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintPure, Category = "Util", meta = (WorldContext = "WorldContextObject"))
@@ -26,4 +29,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Util")
 		static void AddOnScreenDebugMessage(FString text, int index = -1, float timeToDisplay = 4.0f, FLinearColor colour = FLinearColor::Red, bool newerOnTop = true, FVector2D textScale = FVector2D::UnitVector);
 
+	template<typename T>
+	static T* GetDervivedHUD(const UObject* WorldContextObject);
 };

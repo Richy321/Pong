@@ -5,6 +5,9 @@
 #include "PongGameState.h"
 #include "PongPawn.h"
 #include "PongHUD.h"
+#include "UI/Menus/MenuScreenWidget.h"
+#include "PongGameInstance.h"
+#include "PongLobbyHUD.h"
 
 #include "Camera/CameraActor.h"
 
@@ -16,17 +19,19 @@ APongPlayerController::APongPlayerController()
 void APongPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
-	InputComponent->BindAxis("VerticalMovement", this, &APongPlayerController::VerticalMovement);
+	InputComponent->BindAxis("VerticalMovement", this, &APongPlayerController::HandleMovement).bExecuteWhenPaused = true;
 	InputComponent->BindAction("Options", IE_Pressed, this, &APongPlayerController::TogglePause).bExecuteWhenPaused = true;
+	InputComponent->BindAction("Select", IE_Pressed, this, &APongPlayerController::HandleSelect).bExecuteWhenPaused = true;
+	InputComponent->BindAction("Back", IE_Pressed, this, &APongPlayerController::HandleBack).bExecuteWhenPaused = true;
 }
 void APongPlayerController::BeginPlay()
 {
 	//Set main camera as players view 
 	
-	APongGameState* gameState = UPongBlueprintFunctionLibrary::GetPongGameState(this);
-	if (gameState)
+	APongGameState* GameState = UPongBlueprintFunctionLibrary::GetPongGameState(this);
+	if (GameState)
 	{
-		SetViewTarget(gameState->mainCamera);
+		SetViewTarget(GameState->mainCamera);
 	}
 }
 
@@ -42,11 +47,11 @@ bool APongPlayerController::ServerVerticalMovement_Validate(float DeltaMovement)
 
 void APongPlayerController::BroadcastVerticalMovement_Implementation(float MovementDelta)
 {
-	APawn* pawn = GetPawn();
-	if (IsValid(pawn))
+	APawn* Pawn = GetPawn();
+	if (IsValid(Pawn))
 	{
-		APongPawn* pongPawn = Cast<APongPawn>(pawn);
-		pongPawn->VerticalMovement(MovementDelta);
+		APongPawn* PongPawn = Cast<APongPawn>(Pawn);
+		PongPawn->VerticalMovement(MovementDelta);
 	}
 }
 
@@ -55,13 +60,13 @@ void APongPlayerController::VerticalMovement(float MovementDelta)
 	if (Role == ENetRole::ROLE_Authority)
 	{
 		//On the server directly, make the movement
-		APawn* pawn = GetPawn();
-		if (IsValid(pawn))
+		APawn* Pawn = GetPawn();
+		if (IsValid(Pawn))
 		{
-			APongPawn* pongPawn = Cast<APongPawn>(pawn);
-			if (IsValid(pongPawn))
+			APongPawn* PongPawn = Cast<APongPawn>(Pawn);
+			if (IsValid(PongPawn))
 			{
-				pongPawn->VerticalMovement(MovementDelta);
+				PongPawn->VerticalMovement(MovementDelta);
 			}
 		}
 	}
@@ -72,6 +77,91 @@ void APongPlayerController::VerticalMovement(float MovementDelta)
 	}
 }
 
+//We reuse this player controller in both the Lobby and InGame so input this function reroutes input to the correct place
+void APongPlayerController::HandleMovement(float DeltaMovement)
+{
+	if (FMath::IsNearlyEqual(DeltaMovement, 0.0f))
+	{
+		return;
+	}
+
+	//check if we are in game or menus
+	UPongGameInstance* PongGameInstance = UPongBlueprintFunctionLibrary::GetPongGameInstance(GetWorld());
+	switch (PongGameInstance->GetAppState())
+	{
+	case EAppState::Lobby:
+		{
+			APongLobbyHUD* pongLobbyHUD = UPongBlueprintFunctionLibrary::GetPongLobbyHUD(GetWorld());
+			pongLobbyHUD->MenuManager->HandleMovement(DeltaMovement);
+		}
+		break;
+	case EAppState::Game:
+		{
+			APongGameState* PongGameState = UPongBlueprintFunctionLibrary::GetPongGameState(GetWorld());
+			if (PongGameState->GetState() == EGameState::InGame)
+			{
+				VerticalMovement(DeltaMovement);
+			}
+			else
+			{
+				APongHUD* pongHUD = UPongBlueprintFunctionLibrary::GetPongHUD(GetWorld());
+				pongHUD->MenuManager->HandleMovement(DeltaMovement);
+			}
+		}
+		break;
+	}
+
+}
+
+void APongPlayerController::HandleSelect()
+{
+	//check if we are in game or menus
+	UPongGameInstance* PongGameInstance = UPongBlueprintFunctionLibrary::GetPongGameInstance(GetWorld());
+	switch (PongGameInstance->GetAppState())
+	{
+		case EAppState::Lobby:
+		{
+			APongLobbyHUD* pongLobbyHUD = UPongBlueprintFunctionLibrary::GetPongLobbyHUD(GetWorld());
+			pongLobbyHUD->MenuManager->HandleSelect();
+		}
+		break;
+		case EAppState::Game:
+		{
+			APongGameState* PongGameState = UPongBlueprintFunctionLibrary::GetPongGameState(GetWorld());
+			if (PongGameState->GetState() != EGameState::InGame)
+			{
+				APongHUD* pongHUD = UPongBlueprintFunctionLibrary::GetPongHUD(GetWorld());
+				pongHUD->MenuManager->HandleSelect();
+			}
+		}
+		break;
+	}
+}
+
+void APongPlayerController::HandleBack()
+{	
+	//check if we are in game or menus
+	UPongGameInstance* PongGameInstance = UPongBlueprintFunctionLibrary::GetPongGameInstance(GetWorld());
+	switch (PongGameInstance->GetAppState())
+	{
+		case EAppState::Lobby:
+		{
+			APongLobbyHUD* pongLobbyHUD = UPongBlueprintFunctionLibrary::GetPongLobbyHUD(GetWorld());
+			pongLobbyHUD->MenuManager->HandleBack();
+		}
+		break;
+		case EAppState::Game:
+		{
+			APongGameState* PongGameState = UPongBlueprintFunctionLibrary::GetPongGameState(GetWorld());
+			if (PongGameState->GetState() != EGameState::InGame)
+			{
+				APongHUD* pongHUD = UPongBlueprintFunctionLibrary::GetPongHUD(GetWorld());
+				pongHUD->MenuManager->HandleBack();
+			}
+		}
+		break;
+	}
+}
 
 //void APongPlayerController::Pause()
 //{

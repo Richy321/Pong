@@ -32,10 +32,21 @@ void UPongGameInstance::Join(const FString& IPAddress)
 	UWorld* World = GetWorld();
 	if (!ensure(World != nullptr)) return;
 
-	APongPlayerController* PongPlayerController = GetPrimaryPlayerController();
-	if (IsValid(PongPlayerController))
+	APlayerController* PlayerController = GetFirstLocalPlayerController(GetWorld());
+	if (IsValid(PlayerController))
 	{
-		PongPlayerController->ClientTravel(IPAddress, ETravelType::TRAVEL_Absolute);
+		PlayerController->ClientTravel(IPAddress, ETravelType::TRAVEL_Absolute);
+		AppState = EAppState::Game;
+	}
+}
+
+void UPongGameInstance::Leave()
+{
+	APlayerController* PlayerController = GetFirstLocalPlayerController(GetWorld());
+	if (IsValid(PlayerController))
+	{
+		PlayerController->ClientTravel("/Game/Lobby", ETravelType::TRAVEL_Absolute);
+		AppState = EAppState::Lobby;
 	}
 }
 
@@ -49,15 +60,15 @@ void UPongGameInstance::Host()
 	UWorld* World = GetWorld();
 	if (!ensure(World != nullptr)) return;
 
-	World->ServerTravel("Game/MainLevel?listen");
+	World->ServerTravel("/Game/MainLevel?listen");
+	AppState = EAppState::Game;
 }
 
 void UPongGameInstance::Quit()
 {
-	APlayerController* pc = GetPrimaryPlayerController();
-
+	APlayerController* pc = GetFirstLocalPlayerController(GetWorld());
 	if (IsValid(pc))
 	{
-		pc->ConsoleCommand("Quit");
+		pc->ConsoleCommand("quit");
 	}
 }

@@ -22,7 +22,7 @@ public:
 	APongGameMode();
 
 	UFUNCTION(BlueprintCallable)
-	void Init(class ACameraActor* mainCamera, FVector halfwayLineStart, FVector halfwayLineEnd);
+	void Init(class ACameraActor* MainCamera, FVector HalfwayLineStart, FVector HalfwayLineEnd);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<AActor> BallClass;
@@ -34,10 +34,10 @@ public:
 	AActor* SpawnBall();
 
 	UFUNCTION(BlueprintCallable)
-	void ResetBall(AActor* ball, ESides spawnSide);
+	void ResetBall(AActor* Ball, ESides SpawnSide);
 
 	UFUNCTION(BlueprintCallable)
-	void SpawnAI(ESides side);
+	void SpawnAI(ESides Side);
 
 	UFUNCTION(BlueprintCallable)
 	AActor* GetBall();
@@ -49,7 +49,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int NumGoalsToWin = 10;
 
-	void IncrementScore(ESides side);
+	void IncrementScore(ESides Side);
 
 	UPROPERTY(BlueprintReadOnly)
 	FVector SpawnLineStart;
@@ -64,14 +64,17 @@ public:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	EMultiplayerGameType MultiplayerGameType = EMultiplayerGameType::SinglePlayer;
 
-	APlayerStart* GetFreePlayerStart(EGameType gameType, ESides side);
+	APlayerStart* GetFreePlayerStart(EGameType GameType, ESides Side);
 
 	UFUNCTION(BlueprintCallable)
 	void StartGame();
 
+	UFUNCTION(BlueprintCallable)
+	void RestartGame();
+
 private:
 	UPROPERTY()
-	class APhysicsBall* ball;
-	bool CheckWinState(ESides &side);
+	class APhysicsBall* Ball;
+	bool CheckWinState(ESides &Side);
 	TArray<FPongSpawnPoint> SpawnPoints;
 };

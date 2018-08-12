@@ -17,6 +17,8 @@ public:
 	void Show();
 	UFUNCTION(BlueprintImplementableEvent)
 	void Hide();
+	UFUNCTION(BlueprintImplementableEvent)
+	void Back();
 
 	UFUNCTION(BlueprintCallable)
 	void SetHighlightIndex(int Index);
@@ -30,12 +32,25 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	bool ShouldLoopAround = true;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	TArray<UMenuButtonWidget*> MenuItems;
+	
+	UFUNCTION(BlueprintCallable)
+	void AddMenuButtonWidget(UMenuButtonWidget* button);
 
 	void SelectHighlighted();
 
 protected:
+
+
 	UPROPERTY(BlueprintReadOnly)
 	int HighlightedIndex = 0;
+
+	UPROPERTY(EditAnywhere)
+	float RepeatDelay = 0.2f;
+
+private:
+	TArray<UMenuButtonWidget*> MenuItems;
+
+	void ResetRepeatTimer();
+	FTimerHandle RepeatDelayHandle;
+	bool bIsRepeatDelayActive = false;
 };

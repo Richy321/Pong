@@ -18,6 +18,10 @@ public:
 
 	void BeginPlay() override;
 
+	void HandleMovement(float MovementDelta);
+	void HandleSelect();
+	void HandleBack();
+
 	UFUNCTION(BlueprintCallable)
 	void VerticalMovement(float MovementDelta);
 	UFUNCTION(Server, Unreliable, WithValidation, BlueprintCallable)
@@ -30,6 +34,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void LeaveGame();
 
+	void MenuMovement(float MovementDelta, class UMenuScreenWidget* MenuWidget);
 
 	void SetupInputComponent() override;
 

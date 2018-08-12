@@ -6,6 +6,16 @@
 #include "PongGameInstance.generated.h"
 
 class APongPlayerController;
+
+UENUM(BlueprintType)
+enum class EAppState : uint8
+{
+	Loading,
+	Lobby,
+	Game
+};
+
+
 /**
  * 
  */
@@ -27,5 +37,17 @@ public:
 	void Join(const FString& IPAddress);
 
 	UFUNCTION(BlueprintCallable)
+	void Leave();
+
+	UFUNCTION(BlueprintCallable)
 	void Quit();
+
+	UFUNCTION(BlueprintCallable)
+	EAppState GetAppState() { return AppState; }
+
+	UFUNCTION(BlueprintCallable)
+	void SetAppState(EAppState NewState) { AppState = NewState; }
+
+private:
+	EAppState AppState = EAppState::Loading;
 };

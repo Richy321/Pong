@@ -49,3 +49,38 @@ void UMenuManager::CreateMenus()
 		Screens.Add(MenuType.Key, newMenuScreen);
 	}
 }
+
+void UMenuManager::HandleSelect()
+{
+	if (Screens.Contains(CurrentScreen) && IsValid(Screens[CurrentScreen]))
+	{
+		Screens[CurrentScreen]->SelectHighlighted();
+	}
+}
+
+void UMenuManager::HandleBack()
+{
+	if (Screens.Contains(CurrentScreen) && IsValid(Screens[CurrentScreen]))
+	{
+		Screens[CurrentScreen]->Back();
+	}
+}
+void UMenuManager::HandleMovement(float DeltaMovement)
+{
+	if (Screens.Contains(CurrentScreen) && IsValid(Screens[CurrentScreen]))
+	{
+		if (FMath::IsNearlyEqual(DeltaMovement, 0.0f))
+		{
+			return;
+		}
+
+		if (DeltaMovement > 0)
+		{
+			Screens[CurrentScreen]->HighlightPrevious();
+		}
+		else
+		{
+			Screens[CurrentScreen]->HighlightNext();
+		}
+	}
+}

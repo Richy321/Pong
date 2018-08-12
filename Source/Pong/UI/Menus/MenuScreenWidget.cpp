@@ -2,7 +2,7 @@
 
 #include "MenuScreenWidget.h"
 #include "MenuButtonWidget.h"
-
+#include "TimerManager.h"
 
 
 void UMenuScreenWidget::SetHighlightIndex(int Index)
@@ -14,7 +14,7 @@ void UMenuScreenWidget::SetHighlightIndex(int Index)
 			MenuItems[HighlightedIndex]->UnHighlight();
 		}
 
-		MenuItems[HighlightedIndex]->Highlight();
+		MenuItems[Index]->Highlight();
 		HighlightedIndex = Index;
 	}
 	else
@@ -25,6 +25,11 @@ void UMenuScreenWidget::SetHighlightIndex(int Index)
 
 void UMenuScreenWidget::HighlightNext()
 {
+	if (bIsRepeatDelayActive)
+	{
+		return;
+	}
+
 	if (MenuItems.IsValidIndex(HighlightedIndex + 1))
 	{
 		SetHighlightIndex(HighlightedIndex + 1);
@@ -33,10 +38,16 @@ void UMenuScreenWidget::HighlightNext()
 	{
 		SetHighlightIndex(0);
 	}
+	ResetRepeatTimer();
 }
 
 void UMenuScreenWidget::HighlightPrevious()
 {
+	if (bIsRepeatDelayActive)
+	{
+		return;
+	}
+
 	if (MenuItems.IsValidIndex(HighlightedIndex - 1))
 	{
 		SetHighlightIndex(HighlightedIndex - 1);
@@ -45,6 +56,7 @@ void UMenuScreenWidget::HighlightPrevious()
 	{
 		SetHighlightIndex(MenuItems.Num() - 1);
 	}
+	ResetRepeatTimer();
 }
 
 void UMenuScreenWidget::SelectHighlighted()
@@ -56,6 +68,25 @@ void UMenuScreenWidget::SelectHighlighted()
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s - Trying to select an invalid index"), *FString(__FUNCTION__));
-
 	}
+}
+
+void UMenuScreenWidget::AddMenuButtonWidget(UMenuButtonWidget* button)
+{
+	MenuItems.Add(button);
+}
+
+void UMenuScreenWidget::ResetRepeatTimer()
+{
+	bIsRepeatDelayActive = true;
+	GetWorld()->GetTimerManager().ClearTimer(RepeatDelayHandle);
+
+	FTimerDelegate DeactivateRepeatDelayCallback;
+	DeactivateRepeatDelayCallback.BindLambda([this]
+	{
+		bIsRepeatDelayActive = false;
+	});
+
+	FTimerHandle Handle;
+	GetWorld()->GetTimerManager().SetTimer(RepeatDelayHandle, DeactivateRepeatDelayCallback, RepeatDelay, false);
 }

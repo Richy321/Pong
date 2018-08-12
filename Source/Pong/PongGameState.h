@@ -51,6 +51,8 @@ public:
 	UFUNCTION()
 	void UnPause();
 
+	UFUNCTION()
+	void ResetScore();
 
 	UFUNCTION()
 	void GameFinished();
@@ -65,5 +67,4 @@ protected:
 
 	UFUNCTION(NetMulticast, reliable)
 	void BroadcastGameFinished(FGameScore result);
-
 };

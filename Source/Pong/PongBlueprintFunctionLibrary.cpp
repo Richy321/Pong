@@ -9,6 +9,7 @@
 
 #include "PongGameInstance.h"
 #include "PongHUD.h"
+#include "PongLobbyHUD.h"
 #include "PongGameState.h"
 #include "PongGameMode.h"
 
@@ -30,7 +31,8 @@ APongGameState* UPongBlueprintFunctionLibrary::GetPongGameState(const UObject* W
 	return nullptr;
 }
 
-APongHUD* UPongBlueprintFunctionLibrary::GetPongHUD(const UObject* WorldContextObject)
+template<typename T>
+static T* UPongBlueprintFunctionLibrary::GetDervivedHUD(const UObject* WorldContextObject)
 {
 	if (!IsValid(WorldContextObject))
 	{
@@ -43,16 +45,24 @@ APongHUD* UPongBlueprintFunctionLibrary::GetPongHUD(const UObject* WorldContextO
 		return nullptr;
 	}
 
-	APongHUD* hud = nullptr;
 	//Primary HUD is on controller 0
 	APlayerController* player = UGameplayStatics::GetPlayerController(WorldContextObject, 0);
 	if (IsValid(player))
 	{
-		hud = Cast<APongHUD>(player->GetHUD());
+		return Cast<T>(player->GetHUD());
 	}
-	return hud;
+	return nullptr;
 }
 
+APongHUD* UPongBlueprintFunctionLibrary::GetPongHUD(const UObject* WorldContextObject)
+{
+	return GetDervivedHUD<APongHUD>(WorldContextObject);
+}
+
+APongLobbyHUD* UPongBlueprintFunctionLibrary::GetPongLobbyHUD(const UObject* WorldContextObject)
+{
+	return GetDervivedHUD<APongLobbyHUD>(WorldContextObject);
+}
 
 APongGameMode* UPongBlueprintFunctionLibrary::GetPongGameMode(const UObject* WorldContextObject)
 {
