@@ -27,6 +27,3 @@ public:
 		static void AddOnScreenDebugMessage(FString text, int index = -1, float timeToDisplay = 4.0f, FLinearColor colour = FLinearColor::Red, bool newerOnTop = true, FVector2D textScale = FVector2D::UnitVector);
 
 };
-
-
-#define UE_LOG_FUNC(text) UE_LOG(LogTemp, Warning, TEXT("%s - ") + , *FString(__FUNCTION__), controllerID, *errorStr);

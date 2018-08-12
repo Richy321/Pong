@@ -13,15 +13,19 @@ APongPawn::APongPawn()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	
-	SetReplicateMovement(true);
-	SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
 void APongPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (HasAuthority())
+	{
+		SetReplicateMovement(true);
+		SetReplicates(true);
+	}
+
 	if (IsValid(mainMeshComponent))
 	{
 		mainMeshComponent->OnComponentHit.AddDynamic(this, &APongPawn::HandleOnComponentHit);

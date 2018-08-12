@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
-#include "SidesEnum.h"
 #include "Runtime/Engine/Classes/Engine/TriggerVolume.h"
-#include "PongGameState.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnScoreIncrementDelegate);
+#include "GameScore.h"
+#include "SidesEnum.h"
+#include "PongGameState.generated.h"
 
 UENUM(BlueprintType)
 enum class EGameState : uint8
@@ -27,15 +27,9 @@ public:
 
 	APongGameState();
 
-	UPROPERTY(BlueprintReadWrite)
-	EGameState state;
+	inline EGameState GetState() { return state; }
 
 	void IncrementScore(ESides side);
-	UPROPERTY(BlueprintAssignable)
-	FOnScoreIncrementDelegate OnScoreIncrement;
-
-	UFUNCTION(BlueprintCallable)
-	const TMap<ESides, int> GetScoreboard() const;
 
 	UPROPERTY(BlueprintReadWrite)
 	TArray<ATriggerVolume*> goals;
@@ -43,11 +37,33 @@ public:
 	void BeginPlay() override;
 
 	UPROPERTY(BlueprintReadOnly, replicated)
-		ACameraActor* mainCamera;
+	ACameraActor* mainCamera;
+
+	UFUNCTION()
+	void UpdateScore();
+
+	UFUNCTION()
+	int GetScore(ESides side);
+
+	UFUNCTION()
+	void Pause();
+	
+	UFUNCTION()
+	void UnPause();
+
+
+	UFUNCTION()
+	void GameFinished();
 
 	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
+protected:
+	UPROPERTY(BlueprintReadWrite)
+	EGameState state;
 
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = UpdateScore)
+	FGameScore Score;
 
-private:
-	TMap<ESides, int> scoreboard;
+	UFUNCTION(NetMulticast, reliable)
+	void BroadcastGameFinished(FGameScore result);
+
 };

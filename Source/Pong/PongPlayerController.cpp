@@ -3,8 +3,10 @@
 #include "PongPlayerController.h"
 #include "PongBlueprintFunctionLibrary.h"
 #include "PongGameState.h"
-#include "Camera/CameraActor.h"
 #include "PongPawn.h"
+#include "PongHUD.h"
+
+#include "Camera/CameraActor.h"
 
 APongPlayerController::APongPlayerController()
 {
@@ -15,6 +17,7 @@ void APongPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 	InputComponent->BindAxis("VerticalMovement", this, &APongPlayerController::VerticalMovement);
+	InputComponent->BindAction("Options", IE_Pressed, this, &APongPlayerController::TogglePause).bExecuteWhenPaused = true;
 }
 void APongPlayerController::BeginPlay()
 {
@@ -64,7 +67,115 @@ void APongPlayerController::VerticalMovement(float MovementDelta)
 	}
 	else
 	{
-		//Not on the server, request the server to make the movement
+		//Not on the server, request the server to make the movement (and replicate it back to the client)
 		ServerVerticalMovement(MovementDelta);
 	}
+}
+
+
+//void APongPlayerController::Pause()
+//{
+//	APongGameState* state = UPongBlueprintFunctionLibrary::GetPongGameState(this);
+//	if (state->GetState() == EGameState::Paused)
+//	{
+//		return;
+//	}
+//
+//	if (Role == ENetRole::ROLE_Authority)
+//	{
+//		//On the server directly, pause the game
+//		state->GetState()
+//
+//	}
+//	else
+//	{
+//		//Not on the server, request the server to make the movement (and replicate it back to the client)
+//		ServerPause();
+//	}
+//}
+//
+//void APongPlayerController::UnPause()
+//{
+//	APongGameState* state = UPongBlueprintFunctionLibrary::GetPongGameState(this);
+//	if (state->GetState() != EGameState::Paused)
+//	{
+//		return;
+//	}
+//
+//	if (Role == ENetRole::ROLE_Authority)
+//	{
+//		//On the server directly, pause the game
+//
+//
+//	}
+//	else
+//	{
+//		//Not on the server, request the server to make the movement (and replicate it back to the client)
+//		ServerPause();
+//	}
+//}
+
+
+//void APongPlayerController::ServerPause_Implementation()
+//{
+//	//BroadcastPause();
+//}
+//
+//bool APongPlayerController::ServerPause_Validate()
+//{
+//	return true;
+//}
+//
+//void APongPlayerController::ServerUnPause_Implementation()
+//{
+//	//BroadcastUnPause();
+//}
+//
+//bool APongPlayerController::ServerUnPause_Validate()
+//{
+//	return true;
+//}
+
+void APongPlayerController::TogglePause()
+{
+	APongGameState* State = UPongBlueprintFunctionLibrary::GetPongGameState(this);
+	APongHUD* PongHUD = UPongBlueprintFunctionLibrary::GetPongHUD(this);
+
+	switch (State->GetState())
+	{
+	case EGameState::InGame:
+		if (SetPause(true))
+		{
+			State->Pause();
+			UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage("Paused Successfully");
+		}
+		else
+		{
+			UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage("Pause failed");
+		}
+
+		PongHUD->MenuManager->GoToScreen(EMenuScreens::PauseMenu);
+		break;
+	case EGameState::Paused:
+		if (SetPause(false))
+		{
+			State->UnPause();
+			UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage("UnPaused Successfully");
+		}
+		else
+		{
+			UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage("UnPause failed");
+		}
+		PongHUD->MenuManager->GoToScreen(EMenuScreens::None);
+		break;
+	default:
+		break;
+	}
+}
+
+void APongPlayerController::LeaveGame()
+{
+	//RPC to quit?
+	ClientTravel("Game/MainMenu", ETravelType::TRAVEL_Absolute);
+
 }

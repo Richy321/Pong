@@ -47,14 +47,14 @@ public:
 
 	//Rules
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int NumGoalsToWin = 5;
+	int NumGoalsToWin = 10;
 
 	void IncrementScore(ESides side);
 
 	UPROPERTY(BlueprintReadOnly)
-	FVector spawnLineStart;
+	FVector SpawnLineStart;
 	UPROPERTY(BlueprintReadOnly)
-	FVector spawnLineEnd;
+	FVector SpawnLineEnd;
 
 	AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 
@@ -68,11 +68,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void StartGame();
-	
+
 private:
 	UPROPERTY()
 	class APhysicsBall* ball;
 	bool CheckWinState(ESides &side);
-
 	TArray<FPongSpawnPoint> SpawnPoints;
 };

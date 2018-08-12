@@ -19,13 +19,32 @@ public:
 	void BeginPlay() override;
 
 	UFUNCTION(BlueprintCallable)
-		void VerticalMovement(float MovementDelta);
-
+	void VerticalMovement(float MovementDelta);
 	UFUNCTION(Server, Unreliable, WithValidation, BlueprintCallable)
-		void ServerVerticalMovement(float MovementDelta);
-
+	void ServerVerticalMovement(float MovementDelta);
 	UFUNCTION(NetMulticast, Unreliable)
-		void BroadcastVerticalMovement(float MovementDelta);
+	void BroadcastVerticalMovement(float MovementDelta);
+
+	UFUNCTION(BlueprintCallable)
+	void TogglePause();
+	UFUNCTION(BlueprintCallable)
+	void LeaveGame();
+
 
 	void SetupInputComponent() override;
+
+private:
+	//UFUNCTION()
+	//	void Pause();
+	//UFUNCTION(Server, Reliable, WithValidation)
+	//	void ServerPause();
+	//UFUNCTION(NetMulticast, Reliable)
+	//	void BroadcastPause();
+
+	//UFUNCTION()
+	//	void UnPause();
+	//UFUNCTION(Server, Reliable, WithValidation)
+	//	void ServerUnPause();
+	//UFUNCTION(NetMulticast, Reliable)
+	//	void BroadcastUnPause();
 };

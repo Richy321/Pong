@@ -8,7 +8,10 @@
 
 AGoalTriggerVolume::AGoalTriggerVolume()
 {
-	GetCollisionComponent()->OnComponentBeginOverlap.AddDynamic(this, &AGoalTriggerVolume::HandleComponentBeginOverlap);
+	if (Role == ENetRole::ROLE_Authority)
+	{
+		GetCollisionComponent()->OnComponentBeginOverlap.AddDynamic(this, &AGoalTriggerVolume::HandleComponentBeginOverlap);
+	}
 }
 
 void AGoalTriggerVolume::BeginPlay()
@@ -17,13 +20,16 @@ void AGoalTriggerVolume::BeginPlay()
 
 void AGoalTriggerVolume::HandleComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (OtherActor->IsA<APhysicsBall>())
+	if (Role == ENetRole::ROLE_Authority)
 	{
-		APongGameMode* gameMode = UPongBlueprintFunctionLibrary::GetPongGameMode(this);
-		gameMode->IncrementScore(side == ESides::Left ? ESides::Right : ESides::Left);
-	}
-	else
-	{
-		UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage(OtherActor->GetName() + TEXT("Is not a APhysicsBall"));
+		if (OtherActor->IsA<APhysicsBall>())
+		{
+			APongGameMode* gameMode = UPongBlueprintFunctionLibrary::GetPongGameMode(this);
+			gameMode->IncrementScore(side == ESides::Left ? ESides::Right : ESides::Left);
+		}
+		else
+		{
+			UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage(OtherActor->GetName() + TEXT("Is not a APhysicsBall"));
+		}
 	}
 }

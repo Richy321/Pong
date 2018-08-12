@@ -1,27 +1,25 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PongGameMode.h"
+
 #include "Engine/World.h"
 #include "Camera/CameraActor.h"
 #include "Classes/Kismet/GameplayStatics.h"
 #include "Classes/GameFramework/PlayerStart.h"
-#include "Runtime/AIModule/Classes/AIController.h"
-
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "Runtime/Engine/Public/EngineUtils.h"
+#include "Runtime/AIModule/Classes/AIController.h"
+#include "Runtime/AIModule/Classes/Blueprint/AIBlueprintHelperLibrary.h"
 
 #include "PongBlueprintFunctionLibrary.h"
 #include "PongGameState.h"
 #include "PongGameInstance.h"
+#include "PongHUD.h"
 #include "PongPlayerController.h"
-#include "GameFramework/ProjectileMovementComponent.h"
+#include "PongAIController.h"
 #include "PhysicsBall.h"
-
-
-
-#include "Runtime/AIModule/Classes/Blueprint/AIBlueprintHelperLibrary.h"
 #include "PongSpawnPoint.h"
 #include "PongPlayerStart.h"
-#include "PongAIController.h"
 
 APongGameMode::APongGameMode()
 {
@@ -34,8 +32,8 @@ void APongGameMode::ResetBall(AActor* ball, ESides spawnSide)
 	FVector spawnPoint;
 
 	float randF = FMath::RandRange(0.0f, 1.0f);
-	FVector line = (spawnLineEnd - spawnLineStart);
-	line = spawnLineStart + (line * randF);
+	FVector line = (SpawnLineEnd - SpawnLineStart);
+	line = SpawnLineStart + (line * randF);
 
 	float direction = 0.0f;
 	switch (spawnSide)
@@ -119,21 +117,24 @@ void APongGameMode::IncrementScore(ESides side)
 		ESides winningSide;
 		if (CheckWinState(winningSide))
 		{
-			EndMatch();
 			//trigger winning state on gamestate
+			pongState->GameFinished();
 		}
-		ESides serveSide = ESides::None;
-
-		if (side == ESides::Left)
+		else
 		{
-			serveSide = ESides::Right;
-		}
-		else if (side == ESides::Right)
-		{
-			serveSide = ESides::Left;
-		}
+			ESides serveSide = ESides::None;
 
-		ResetBall(ball, serveSide);
+			if (side == ESides::Left)
+			{
+				serveSide = ESides::Right;
+			}
+			else if (side == ESides::Right)
+			{
+				serveSide = ESides::Left;
+			}
+
+			ResetBall(ball, serveSide);
+		}
 	}
 }
 
@@ -142,13 +143,15 @@ bool APongGameMode::CheckWinState(ESides &winningSide)
 	APongGameState* pongState = UPongBlueprintFunctionLibrary::GetPongGameState(GetWorld());
 	if (IsValid(pongState))
 	{
-		for (auto sides : pongState->GetScoreboard())
+		if (pongState->GetScore(ESides::Left) >= NumGoalsToWin)
 		{
-			if (sides.Value >= NumGoalsToWin)
-			{
-				winningSide = sides.Key;
-				return true;
-			}
+			winningSide = ESides::Left;
+			return true;
+		}
+		else if (pongState->GetScore(ESides::Right) >= NumGoalsToWin)
+		{
+			winningSide = ESides::Right;
+			return true;
 		}
 	}
 	return false;
@@ -162,22 +165,10 @@ void APongGameMode::Init(ACameraActor* camera, FVector halfwayLineStart, FVector
 		return;
 	}
 	
-	spawnLineStart = halfwayLineStart;
-	spawnLineEnd = halfwayLineEnd;
+	SpawnLineStart = halfwayLineStart;
+	SpawnLineEnd = halfwayLineEnd;
 	APongGameState* pongState = UPongBlueprintFunctionLibrary::GetPongGameState(this);
 	pongState->mainCamera = camera;
-
-
-	//Set main camera as players view 
-	//UPongGameInstance* gameInstance = UPongBlueprintFunctionLibrary::GetPongGameInstance(GetWorld());
-	//if (IsValid(gameInstance))
-	//{
-	//	APongPlayerController* pc = gameInstance->GetPrimaryPlayerController();
-	//	if (IsValid(pc))
-	//	{
-	//		pc->SetViewTarget(camera);
-	//	}
-	//}
 }
 
 

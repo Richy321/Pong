@@ -24,7 +24,7 @@ void APongAIController::Tick(float DeltaTime)
 	if (IsValid(Ball) && IsValid(Pawn))
 	{
 		FVector PaddleLocation = Pawn->GetActorLocation();
-		FVector SpawnLine = GameMode->spawnLineEnd - GameMode->spawnLineStart;
+		FVector SpawnLine = GameMode->SpawnLineEnd - GameMode->SpawnLineStart;
 		FVector BallLocation = Ball->GetActorLocation();
 
 		float distanceToLine = FMath::Abs(PaddleLocation.Y - SpawnLine.Y);
