@@ -45,9 +45,9 @@ void UMenuManager::CreateMenus()
 {
 	for (auto MenuType : ScreenClasses)
 	{
-		UMenuScreenWidget* newMenuScreen;
-		CreateMenu<UMenuScreenWidget>(MenuType.Value, newMenuScreen, 10);
-		Screens.Add(MenuType.Key, newMenuScreen);
+		UMenuScreenWidget* NewMenuScreen;
+		CreateMenu<UMenuScreenWidget>(MenuType.Value, NewMenuScreen, 10);
+		Screens.Add(MenuType.Key, NewMenuScreen);
 	}
 }
 

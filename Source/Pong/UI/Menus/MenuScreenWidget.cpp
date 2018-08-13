@@ -73,9 +73,9 @@ void UMenuScreenWidget::SelectHighlighted()
 	}
 }
 
-void UMenuScreenWidget::AddMenuButtonWidget(UMenuButtonWidget* button)
+void UMenuScreenWidget::AddMenuButtonWidget(UMenuButtonWidget* Button)
 {
-	MenuItems.Add(button);
+	MenuItems.Add(Button);
 }
 
 void UMenuScreenWidget::ResetRepeatTimer()

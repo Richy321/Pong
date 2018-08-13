@@ -20,9 +20,21 @@ public:
 
 	void SetPawn(APawn* InPawn) override;
 
+	void RandomiseDifficulty();
+
 private:
-	void MoveTowards(const FVector& TargetPosition);
+	void MoveTowards(float TargetZ);
 	FVector OriginalPosition;
 	
+	float ReactionUpper;
+	float ReactionLower;
 
+	float AccuracyUpper;
+	float AccuracyLower;
+
+	float GetReaction();
+	float GetAccuracy();
+
+	float CurrentAccuracy = -1.0f;
+	float CurrentReactionTime = -1.0f;
 };

@@ -42,7 +42,7 @@ void APongGameState::BeginPlay()
 	Super::BeginPlay();
 }
 
-void APongGameState::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const
+void APongGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
@@ -69,11 +69,11 @@ void APongGameState::UpdateStartingCountdownUI()
 	}
 }
 
-int APongGameState::GetScore(ESides side)
+int APongGameState::GetScore(ESides Side)
 {
-	if (side == ESides::Left)
+	if (Side == ESides::Left)
 		return Score.ScoreLeft;
-	if (side == ESides::Right)
+	if (Side == ESides::Right)
 		return Score.ScoreRight;
 
 	return 0;

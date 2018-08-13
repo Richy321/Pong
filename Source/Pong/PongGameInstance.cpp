@@ -13,10 +13,10 @@ UPongGameInstance::UPongGameInstance(const FObjectInitializer& ObjectInitializer
 
 APongPlayerController* UPongGameInstance::GetPrimaryPlayerController()
 {
-	APlayerController* pc = GetFirstLocalPlayerController(GetWorld());
-	if (IsValid(pc))
+	APlayerController* PlayerController = GetFirstLocalPlayerController(GetWorld());
+	if (IsValid(PlayerController))
 	{
-		return Cast<APongPlayerController>(pc);
+		return Cast<APongPlayerController>(PlayerController);
 	}
 
 	return nullptr;
@@ -66,10 +66,10 @@ void UPongGameInstance::Host()
 
 void UPongGameInstance::Quit()
 {
-	APlayerController* pc = GetFirstLocalPlayerController(GetWorld());
-	if (IsValid(pc))
+	APlayerController* PlayerController = GetFirstLocalPlayerController(GetWorld());
+	if (IsValid(PlayerController))
 	{
-		pc->ConsoleCommand("quit");
+		PlayerController->ConsoleCommand("quit");
 	}
 }
 

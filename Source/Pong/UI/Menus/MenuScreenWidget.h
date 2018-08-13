@@ -34,7 +34,7 @@ public:
 	bool ShouldLoopAround = true;
 	
 	UFUNCTION(BlueprintCallable)
-	void AddMenuButtonWidget(UMenuButtonWidget* button);
+	void AddMenuButtonWidget(UMenuButtonWidget* Button);
 
 	void SelectHighlighted();
 

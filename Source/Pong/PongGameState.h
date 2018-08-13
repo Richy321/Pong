@@ -32,16 +32,16 @@ public:
 	inline EGameState GetState() { return State; }
 
 	UPROPERTY(BlueprintReadWrite)
-	TArray<ATriggerVolume*> goals;
+	TArray<ATriggerVolume*> Goals;
 
 	void BeginPlay() override;
 
 	UPROPERTY(BlueprintReadOnly, replicated)
 	ACameraActor* MainCamera;
 
-	void IncrementScore(ESides side);
+	void IncrementScore(ESides Side);
 	UFUNCTION()
-	int GetScore(ESides side);
+	int GetScore(ESides Side);
 	UFUNCTION()
 	void UpdateScoreUI();
 	UFUNCTION()
@@ -64,7 +64,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = UpdateStartingCountdownUI)
 	float StartingCountdownRemaining = 3;
 
-	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 protected:
 	UPROPERTY(BlueprintReadWrite)
 	EGameState State = EGameState::Waiting;
@@ -73,7 +73,7 @@ protected:
 	FGameScore Score;
 
 	UFUNCTION(NetMulticast, reliable)
-	void BroadcastGameFinished(FGameScore result);
+	void BroadcastGameFinished(FGameScore Result);
 	UFUNCTION(NetMulticast, reliable)
 	void BroadcastGameStarting();
 	UFUNCTION(NetMulticast, reliable)

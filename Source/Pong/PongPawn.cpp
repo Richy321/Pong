@@ -1,12 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PongPawn.h"
-#include "Components/StaticMeshComponent.h"
-#include "PongBlueprintFunctionLibrary.h"
-#include "Runtime/Engine/Classes/Curves/CurveFloat.h"
-#include "GameFramework/ProjectileMovementComponent.h"
 #include "PhysicsBall.h"
+#include "PongBlueprintFunctionLibrary.h"
+
+#include "GameFramework/ProjectileMovementComponent.h"
+#include "Runtime/Engine/Classes/Curves/CurveFloat.h"
 #include "Runtime/Engine/Classes/Engine/World.h"
+#include "Components/StaticMeshComponent.h"
 
 // Sets default values
 APongPawn::APongPawn()
@@ -26,14 +27,14 @@ void APongPawn::BeginPlay()
 		SetReplicates(true);
 	}
 
-	if (IsValid(mainMeshComponent))
+	if (IsValid(MainMeshComponent))
 	{
-		mainMeshComponent->OnComponentHit.AddDynamic(this, &APongPawn::HandleOnComponentHit);
+		MainMeshComponent->OnComponentHit.AddDynamic(this, &APongPawn::HandleOnComponentHit);
 
-		FVector min, max;
-		mainMeshComponent->GetLocalBounds(min, max);
-		float paddleHeight = max.Z - min.Z;
-		PaddleHeightHalf = paddleHeight / 2.0f;
+		FVector Min, Max;
+		MainMeshComponent->GetLocalBounds(Min, Max);
+		float PaddleHeight = Max.Z - Min.Z;
+		PaddleHeightHalf = PaddleHeight / 2.0f;
 	}
 }
 
@@ -61,32 +62,32 @@ void APongPawn::HandleOnComponentHit(UPrimitiveComponent* HitComponent, AActor* 
 {
 	if (OtherActor->IsA(APhysicsBall::StaticClass()))
 	{
-		FVector localImpactPoint = HitComponent->GetComponentTransform().Inverse().TransformPosition(Hit.ImpactPoint);
+		FVector LocalImpactPoint = HitComponent->GetComponentTransform().Inverse().TransformPosition(Hit.ImpactPoint);
 
 		//get percentage of whole height
-		float zPositionPerc = localImpactPoint.Z / PaddleHeightHalf;
+		float zPositionPerc = LocalImpactPoint.Z / PaddleHeightHalf;
 
 		//sample position from curve and invert due to curve shape
-		float reflectionScaler = 1.0f - ReflectionCurve->GetFloatValue(FMath::Abs(zPositionPerc));
+		float ReflectionScaler = 1.0f - ReflectionCurve->GetFloatValue(FMath::Abs(zPositionPerc));
 
 		//add the sign back in and convert to rad
-		float maxReflectAngle = FMath::DegreesToRadians(MaxBounceAngle * FMath::Sign(zPositionPerc));
+		float MaxReflectAngle = FMath::DegreesToRadians(MaxBounceAngle * FMath::Sign(zPositionPerc));
 
-		float xPos = FMath::Cos(maxReflectAngle * reflectionScaler);
-		float yPos = FMath::Sin(maxReflectAngle * reflectionScaler);
+		float XPos = FMath::Cos(MaxReflectAngle * ReflectionScaler);
+		float YPos = FMath::Sin(MaxReflectAngle * ReflectionScaler);
 
-		float impluseScalar = OtherActor->GetVelocity().Size();
+		float ImpluseScalar = OtherActor->GetVelocity().Size();
 
-		UActorComponent* actorComponent = OtherActor->GetComponentByClass(UProjectileMovementComponent::StaticClass());
-		if (IsValid(actorComponent))
+		UActorComponent* ActorComponent = OtherActor->GetComponentByClass(UProjectileMovementComponent::StaticClass());
+		if (IsValid(ActorComponent))
 		{
-			UProjectileMovementComponent* projectileComponent = Cast<UProjectileMovementComponent>(actorComponent);
-			if (IsValid(projectileComponent))
+			UProjectileMovementComponent* ProjectileComponent = Cast<UProjectileMovementComponent>(ActorComponent);
+			if (IsValid(ProjectileComponent))
 			{
-				FVector direction = FVector(0.0f, xPos, yPos);
-				direction.Normalize();
-				projectileComponent->Velocity = direction * impluseScalar;
-				UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage(FString::Printf(TEXT("Velocity: %s"), *projectileComponent->Velocity.ToCompactString()));
+				FVector Direction = FVector(0.0f, XPos, YPos);
+				Direction.Normalize();
+				ProjectileComponent->Velocity = Direction * ImpluseScalar;
+				UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage(FString::Printf(TEXT("Velocity: %s"), *ProjectileComponent->Velocity.ToCompactString()));
 			}
 		}
 	}

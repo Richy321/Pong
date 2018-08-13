@@ -24,9 +24,9 @@ UPongGameInstance* UPongBlueprintFunctionLibrary::GetPongGameInstance(const UObj
 
 APongGameState* UPongBlueprintFunctionLibrary::GetPongGameState(const UObject* WorldContextObject)
 {
-	AGameStateBase* state = UGameplayStatics::GetGameState(WorldContextObject);
-	if (state)
-		return Cast<APongGameState>(state);
+	AGameStateBase* State = UGameplayStatics::GetGameState(WorldContextObject);
+	if (State)
+		return Cast<APongGameState>(State);
 
 	return nullptr;
 }
@@ -66,17 +66,17 @@ APongLobbyHUD* UPongBlueprintFunctionLibrary::GetPongLobbyHUD(const UObject* Wor
 
 APongGameMode* UPongBlueprintFunctionLibrary::GetPongGameMode(const UObject* WorldContextObject)
 {
-	AGameModeBase* gameMode = UGameplayStatics::GetGameMode(WorldContextObject);
-	if (gameMode)
-		return Cast<APongGameMode>(gameMode);
+	AGameModeBase* GameMode = UGameplayStatics::GetGameMode(WorldContextObject);
+	if (GameMode)
+		return Cast<APongGameMode>(GameMode);
 
 	return nullptr;
 }
 
-void UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage(FString text, int index, float timeToDisplay, FLinearColor colour, bool newerOnTop, FVector2D textScale)
+void UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage(FString Text, int Index, float TimeToDisplay, FLinearColor Colour, bool NewerOnTop, FVector2D TextScale)
 {
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(index, timeToDisplay, colour.ToFColor(false), text, newerOnTop, textScale);
+		GEngine->AddOnScreenDebugMessage(Index, TimeToDisplay, Colour.ToFColor(false), Text, NewerOnTop, TextScale);
 	}
 }

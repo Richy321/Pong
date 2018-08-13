@@ -7,9 +7,9 @@
 #include "SidesEnum.h"
 #include "GameTypesEnum.h"
 #include "GameFramework/PlayerStart.h"
-#include "PongSpawnPoint.h"
 #include "PongGameMode.generated.h"
 
+class APhysicsBall;
 /**
  * 
  */
@@ -40,7 +40,7 @@ public:
 	APongAIController* SpawnAI(ESides Side);
 
 	UFUNCTION(BlueprintCallable)
-	AActor* GetBall();
+	APhysicsBall* GetBall();
 
 	bool ReadyToStartMatch_Implementation() override;
 	bool ReadyToEndMatch_Implementation() override;
@@ -77,13 +77,12 @@ protected:
 
 private:
 	UPROPERTY()
-	class APhysicsBall* Ball;
+	APhysicsBall* Ball;
 
 	UPROPERTY()
 	APongAIController* AIController;
 
 	bool CheckWinState(ESides &Side);
-	TArray<FPongSpawnPoint> SpawnPoints;
 
 	FTimerHandle StartingCountdownTimerHandle;
 	FTimerHandle JoinStartDelayTimerHandle;

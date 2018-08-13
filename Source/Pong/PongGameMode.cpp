@@ -19,7 +19,6 @@
 #include "PongPlayerController.h"
 #include "PongAIController.h"
 #include "PhysicsBall.h"
-#include "PongSpawnPoint.h"
 #include "PongPlayerStart.h"
 
 APongGameMode::APongGameMode()
@@ -173,12 +172,6 @@ void APongGameMode::Init(ACameraActor* Camera, FVector HalfwayLineStart, FVector
 	PongState->MainCamera = Camera;
 }
 
-
-//void APongGameMode::StartMatch()
-//{
-//	//SpawnBall();
-//}
-
 bool APongGameMode::ReadyToStartMatch_Implementation()
 {
 	return true;
@@ -198,13 +191,13 @@ AActor* APongGameMode::ChoosePlayerStart_Implementation(AController* Player)
 	if (Player->IsA(APlayerController::StaticClass()))
 	{
 		//Try to take the left spot
-		APlayerStart* start = GetFreePlayerStart(PongGameInstance->GameType, ESides::Left);
-		if (!start)
+		APlayerStart* Start = GetFreePlayerStart(PongGameInstance->GameType, ESides::Left);
+		if (!Start)
 		{
 			//if not available try the right
-			start = GetFreePlayerStart(PongGameInstance->GameType, ESides::Right);
+			Start = GetFreePlayerStart(PongGameInstance->GameType, ESides::Right);
 		}
-		return start;
+		return Start;
 	}
 	else if (Player->IsA(AAIController::StaticClass()))
 	{
@@ -229,7 +222,7 @@ APlayerStart* APongGameMode::GetFreePlayerStart(EGameType GameType, ESides Side)
 	return nullptr;
 }
 
-AActor* APongGameMode::GetBall()
+APhysicsBall* APongGameMode::GetBall()
 {
 	return Ball;
 }

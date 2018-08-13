@@ -20,7 +20,7 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(BlueprintReadWrite, Category="Pong")
-		class UStaticMeshComponent* mainMeshComponent;
+		class UStaticMeshComponent* MainMeshComponent;
 
 public:	
 	// Called every frame
@@ -40,6 +40,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float MaxBounceAngle = 75.0f; //in degrees
+
+	float GetPaddleHeight() { return PaddleHeightHalf * 2.0f; }
 
 private:
 	UFUNCTION()

@@ -92,8 +92,8 @@ void APongPlayerController::HandleMovement(float DeltaMovement)
 	{
 	case EAppState::Lobby:
 		{
-			APongLobbyHUD* pongLobbyHUD = UPongBlueprintFunctionLibrary::GetPongLobbyHUD(GetWorld());
-			pongLobbyHUD->MenuManager->HandleMovement(DeltaMovement);
+			APongLobbyHUD* PongLobbyHUD = UPongBlueprintFunctionLibrary::GetPongLobbyHUD(GetWorld());
+			PongLobbyHUD->MenuManager->HandleMovement(DeltaMovement);
 		}
 		break;
 	case EAppState::Game:
@@ -127,8 +127,8 @@ void APongPlayerController::HandleSelect()
 	{
 		case EAppState::Lobby:
 		{
-			APongLobbyHUD* pongLobbyHUD = UPongBlueprintFunctionLibrary::GetPongLobbyHUD(GetWorld());
-			pongLobbyHUD->MenuManager->HandleSelect();
+			APongLobbyHUD* PongLobbyHUD = UPongBlueprintFunctionLibrary::GetPongLobbyHUD(GetWorld());
+			PongLobbyHUD->MenuManager->HandleSelect();
 		}
 		break;
 		case EAppState::Game:
@@ -136,8 +136,8 @@ void APongPlayerController::HandleSelect()
 			APongGameState* PongGameState = UPongBlueprintFunctionLibrary::GetPongGameState(GetWorld());
 			if (IsValid(PongGameState) && PongGameState->GetState() != EGameState::InGame)
 			{
-				APongHUD* pongHUD = UPongBlueprintFunctionLibrary::GetPongHUD(GetWorld());
-				pongHUD->MenuManager->HandleSelect();
+				APongHUD* PongHUD = UPongBlueprintFunctionLibrary::GetPongHUD(GetWorld());
+				PongHUD->MenuManager->HandleSelect();
 			}
 		}
 		break;
@@ -164,8 +164,8 @@ void APongPlayerController::HandleBack()
 			APongGameState* PongGameState = UPongBlueprintFunctionLibrary::GetPongGameState(GetWorld());
 			if (IsValid(PongGameState) && PongGameState->GetState() != EGameState::InGame)
 			{
-				APongHUD* pongHUD = UPongBlueprintFunctionLibrary::GetPongHUD(GetWorld());
-				pongHUD->MenuManager->HandleBack();
+				APongHUD* PongHUD = UPongBlueprintFunctionLibrary::GetPongHUD(GetWorld());
+				PongHUD->MenuManager->HandleBack();
 			}
 		}
 		break;

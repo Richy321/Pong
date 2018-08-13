@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 #include "PhysicsBall.generated.h"
 
 UCLASS()
@@ -15,17 +16,14 @@ public:
 	// Sets default values for this actor's properties
 	APhysicsBall();
 
+	const UProjectileMovementComponent& GetProjectileMovementComponent() { return *ProjectileMoveComponent; }
+	
+	virtual void Tick(float DeltaTime) override;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	//void SetVelocity(FVector velocity);
-	
-
-private:
-
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	UProjectileMovementComponent* ProjectileMoveComponent;
 };
