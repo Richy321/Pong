@@ -46,7 +46,7 @@ void APongGameState::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & Ou
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(APongGameState, mainCamera);
+	DOREPLIFETIME(APongGameState, MainCamera);
 	DOREPLIFETIME(APongGameState, Score);
 	DOREPLIFETIME(APongGameState, StartingCountdownRemaining);
 }
@@ -82,7 +82,7 @@ int APongGameState::GetScore(ESides side)
 void APongGameState::GameFinished()
 {
 	//EndMatch();
-	state = EGameState::Finished;
+	State = EGameState::Finished;
 	BroadcastGameFinished(Score);
 }
 
@@ -100,7 +100,7 @@ void APongGameState::BroadcastGameFinished_Implementation(FGameScore Result)
 void APongGameState::GameStarting(float CountdownTime)
 {
 	StartingCountdownRemaining = CountdownTime;
-	state = EGameState::Starting;
+	State = EGameState::Starting;
 	BroadcastGameStarting();
 }
 
@@ -117,7 +117,7 @@ void APongGameState::BroadcastGameStarting_Implementation()
 void APongGameState::GameStarted()
 {
 	StartingCountdownRemaining = 1.0f;
-	state = EGameState::InGame;
+	State = EGameState::InGame;
 	BroadcastGameStarted();
 }
 
@@ -134,12 +134,12 @@ void APongGameState::BroadcastGameStarted_Implementation()
 
 void APongGameState::Pause()
 {
-	state = EGameState::Paused;
+	State = EGameState::Paused;
 }
 
 void APongGameState::UnPause()
 {
-	state = EGameState::InGame;
+	State = EGameState::InGame;
 }
 
 void APongGameState::ResetScore()

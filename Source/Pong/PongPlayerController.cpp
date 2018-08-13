@@ -32,7 +32,7 @@ void APongPlayerController::BeginPlay()
 	APongGameState* GameState = UPongBlueprintFunctionLibrary::GetPongGameState(this);
 	if (GameState)
 	{
-		SetViewTarget(GameState->mainCamera);
+		SetViewTarget(GameState->MainCamera);
 	}
 }
 
@@ -245,39 +245,35 @@ void APongPlayerController::TogglePause()
 	case EGameState::InGame:
 	case EGameState::Waiting:
 	case EGameState::Starting:
-		if (SetPause(true))
+		Pause();
+		//if (SetPause(true))
 		{
 			State->Pause();
 			UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage("Paused Successfully");
 		}
-		else
-		{
-			UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage("Pause failed");
-		}
+		//else
+		//{
+		//	UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage("Pause failed");
+		//}
 
 		PongHUD->MenuManager->GoToScreen(EMenuScreens::PauseMenu);
 		break;
 	case EGameState::Paused:
-		if (SetPause(false))
+		Pause();
+		//if (SetPause(false))
 		{
 			State->UnPause();
 			UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage("UnPaused Successfully");
 		}
-		else
-		{
-			UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage("UnPause failed");
-		}
+		//else
+		//{
+		//	UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage("UnPause failed");
+		//}
 		PongHUD->MenuManager->GoToScreen(EMenuScreens::None);
 		break;
 	default:
 		break;
 	}
-}
-
-void APongPlayerController::LeaveGame()
-{
-	//RPC to quit?
-	ClientTravel("Game/MainMenu", ETravelType::TRAVEL_Absolute);
 }
 
 void APongPlayerController::RequestRematch()

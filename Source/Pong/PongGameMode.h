@@ -69,6 +69,8 @@ public:
 	void PostLogin(APlayerController* NewPlayer) override;
 
 	void Tick(float DeltaSeconds) override;
+
+	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	float StartingCountdown = 3;
@@ -84,6 +86,6 @@ private:
 	TArray<FPongSpawnPoint> SpawnPoints;
 
 	FTimerHandle StartingCountdownTimerHandle;
-
+	FTimerHandle JoinStartDelayTimerHandle;
 	int GetRequiredPlayerCount();
 };

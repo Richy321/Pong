@@ -31,8 +31,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void TogglePause();
-	UFUNCTION(BlueprintCallable)
-	void LeaveGame();
 
 	void MenuMovement(float MovementDelta, class UMenuScreenWidget* MenuWidget);
 

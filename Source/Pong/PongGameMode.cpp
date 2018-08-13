@@ -170,7 +170,7 @@ void APongGameMode::Init(ACameraActor* Camera, FVector HalfwayLineStart, FVector
 	SpawnLineStart = HalfwayLineStart;
 	SpawnLineEnd = HalfwayLineEnd;
 	APongGameState* PongState = UPongBlueprintFunctionLibrary::GetPongGameState(this);
-	PongState->mainCamera = Camera;
+	PongState->MainCamera = Camera;
 }
 
 
@@ -236,7 +236,23 @@ AActor* APongGameMode::GetBall()
 
 void APongGameMode::StartGame()
 {
-	APongGameState* PongState = UPongBlueprintFunctionLibrary::GetPongGameState(GetWorld());
+	UWorld* World = GetWorld();
+	if (!IsValid(World))
+	{
+		return;
+	}
+
+	UPongGameInstance* PongGameInstance = UPongBlueprintFunctionLibrary::GetPongGameInstance(World);
+	//Spawn bots
+	if (PongGameInstance->MultiplayerGameType == EMultiplayerGameType::SinglePlayer)
+	{
+		if (!IsValid(AIController))
+		{
+			AIController = SpawnAI(ESides::Right);
+		}
+	}
+
+	APongGameState* PongState = UPongBlueprintFunctionLibrary::GetPongGameState(World);
 	if (IsValid(PongState))
 	{
 		PongState->GameStarting(StartingCountdown);
@@ -247,16 +263,6 @@ void APongGameMode::StartGame()
 	FTimerDelegate DeactivateRepeatDelayCallback;
 	DeactivateRepeatDelayCallback.BindLambda([this]
 	{
-		UPongGameInstance* PongGameInstance = UPongBlueprintFunctionLibrary::GetPongGameInstance(GetWorld());
-		//Spawn bots
-		if (PongGameInstance->MultiplayerGameType == EMultiplayerGameType::SinglePlayer)
-		{
-			if (!IsValid(AIController))
-			{
-				AIController = SpawnAI(ESides::Right);
-			}
-		}
-
 		SpawnBall();
 		ResetBall(Ball, ESides::None);
 		APongGameState* PongState = UPongBlueprintFunctionLibrary::GetPongGameState(GetWorld());
@@ -336,9 +342,16 @@ void APongGameMode::PostLogin(APlayerController* NewPlayer)
 				{
 					StartGame();
 				});
-				FTimerHandle Handle;
-				GetWorld()->GetTimerManager().SetTimer(Handle, DelayStartCallback, 1.0f, false);
+				GetWorld()->GetTimerManager().SetTimer(JoinStartDelayTimerHandle, DelayStartCallback, 1.0f, false);
 			}
 		}
 	}
+}
+
+void APongGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	GetWorld()->GetTimerManager().ClearTimer(StartingCountdownTimerHandle);
+	GetWorld()->GetTimerManager().ClearTimer(JoinStartDelayTimerHandle);
+	
+	GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
 }
