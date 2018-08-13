@@ -94,6 +94,7 @@ void APongGameState::BroadcastGameFinished_Implementation(FGameScore Result)
 	{
 		PongHUD->HideGameUI();
 		PongHUD->ShowGameFinishedUI(Result);
+		State = EGameState::Finished;
 	}
 }
 
@@ -112,6 +113,7 @@ void APongGameState::BroadcastGameStarting_Implementation()
 	{
 		PongHUD->ShowGameStartingUI();
 	}
+	State = EGameState::Starting;
 }
 
 void APongGameState::GameStarted()
@@ -129,6 +131,7 @@ void APongGameState::BroadcastGameStarted_Implementation()
 	{
 		PongHUD->ShowGameUI();
 	}
+	State = EGameState::InGame;
 }
 
 

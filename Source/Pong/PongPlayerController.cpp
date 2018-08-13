@@ -237,6 +237,10 @@ void APongPlayerController::HandleBack()
 
 void APongPlayerController::TogglePause()
 {
+	UPongGameInstance* PongGameInstance = UPongBlueprintFunctionLibrary::GetPongGameInstance(GetWorld());
+	if (PongGameInstance->GetAppState() != EAppState::Game)
+		return;
+
 	APongGameState* State = UPongBlueprintFunctionLibrary::GetPongGameState(this);
 	APongHUD* PongHUD = UPongBlueprintFunctionLibrary::GetPongHUD(this);
 
