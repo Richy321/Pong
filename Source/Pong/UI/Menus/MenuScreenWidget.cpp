@@ -87,6 +87,5 @@ void UMenuScreenWidget::ResetRepeatTimer()
 		bIsRepeatDelayActive = false;
 	});
 
-	FTimerHandle Handle;
 	GetWorld()->GetTimerManager().SetTimer(RepeatDelayHandle, DeactivateRepeatDelayCallback, RepeatDelay, false);
 }

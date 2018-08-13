@@ -20,6 +20,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void GoToScreen(EMenuScreens Screen);
 
+	UFUNCTION(BlueprintCallable)
+	UMenuScreenWidget* GetScreenWidget(EMenuScreens Screen);
+	
 	void HandleMovement(float DeltaMovement);
 	void HandleSelect();
 	void HandleBack();

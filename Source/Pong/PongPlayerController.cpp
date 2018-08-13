@@ -3,6 +3,7 @@
 #include "PongPlayerController.h"
 #include "PongBlueprintFunctionLibrary.h"
 #include "PongGameState.h"
+#include "PongGameMode.h"
 #include "PongPawn.h"
 #include "PongHUD.h"
 #include "UI/Menus/MenuScreenWidget.h"
@@ -77,7 +78,7 @@ void APongPlayerController::VerticalMovement(float MovementDelta)
 	}
 }
 
-//We reuse this player controller in both the Lobby and InGame so input this function reroutes input to the correct place
+//We use this player controller in both the Lobby and InGame so this function routes input to the correct place
 void APongPlayerController::HandleMovement(float DeltaMovement)
 {
 	if (FMath::IsNearlyEqual(DeltaMovement, 0.0f))
@@ -98,14 +99,19 @@ void APongPlayerController::HandleMovement(float DeltaMovement)
 	case EAppState::Game:
 		{
 			APongGameState* PongGameState = UPongBlueprintFunctionLibrary::GetPongGameState(GetWorld());
-			if (PongGameState->GetState() == EGameState::InGame)
+			if (IsValid(PongGameState))
 			{
-				VerticalMovement(DeltaMovement);
-			}
-			else
-			{
-				APongHUD* pongHUD = UPongBlueprintFunctionLibrary::GetPongHUD(GetWorld());
-				pongHUD->MenuManager->HandleMovement(DeltaMovement);
+				if (PongGameState->GetState() == EGameState::InGame ||
+					PongGameState->GetState() == EGameState::Waiting ||
+					PongGameState->GetState() == EGameState::Starting)
+				{
+					VerticalMovement(DeltaMovement);
+				}
+				else
+				{
+					APongHUD* pongHUD = UPongBlueprintFunctionLibrary::GetPongHUD(GetWorld());
+					pongHUD->MenuManager->HandleMovement(DeltaMovement);
+				}
 			}
 		}
 		break;
@@ -128,7 +134,7 @@ void APongPlayerController::HandleSelect()
 		case EAppState::Game:
 		{
 			APongGameState* PongGameState = UPongBlueprintFunctionLibrary::GetPongGameState(GetWorld());
-			if (PongGameState->GetState() != EGameState::InGame)
+			if (IsValid(PongGameState) && PongGameState->GetState() != EGameState::InGame)
 			{
 				APongHUD* pongHUD = UPongBlueprintFunctionLibrary::GetPongHUD(GetWorld());
 				pongHUD->MenuManager->HandleSelect();
@@ -146,14 +152,17 @@ void APongPlayerController::HandleBack()
 	{
 		case EAppState::Lobby:
 		{
-			APongLobbyHUD* pongLobbyHUD = UPongBlueprintFunctionLibrary::GetPongLobbyHUD(GetWorld());
-			pongLobbyHUD->MenuManager->HandleBack();
+			APongLobbyHUD* PongLobbyHUD = UPongBlueprintFunctionLibrary::GetPongLobbyHUD(GetWorld());
+			if (IsValid(PongLobbyHUD))
+			{
+				PongLobbyHUD->MenuManager->HandleBack();
+			}
 		}
 		break;
 		case EAppState::Game:
 		{
 			APongGameState* PongGameState = UPongBlueprintFunctionLibrary::GetPongGameState(GetWorld());
-			if (PongGameState->GetState() != EGameState::InGame)
+			if (IsValid(PongGameState) && PongGameState->GetState() != EGameState::InGame)
 			{
 				APongHUD* pongHUD = UPongBlueprintFunctionLibrary::GetPongHUD(GetWorld());
 				pongHUD->MenuManager->HandleBack();
@@ -267,5 +276,37 @@ void APongPlayerController::LeaveGame()
 {
 	//RPC to quit?
 	ClientTravel("Game/MainMenu", ETravelType::TRAVEL_Absolute);
+}
 
+void APongPlayerController::RequestRematch()
+{
+	APongGameState* State = UPongBlueprintFunctionLibrary::GetPongGameState(this);
+	if (State->GetState() == EGameState::Finished)
+	{
+		if (Role == ENetRole::ROLE_Authority)
+		{
+			APongGameMode* PongGameMode = UPongBlueprintFunctionLibrary::GetPongGameMode(this);
+			if (IsValid(PongGameMode))
+			{
+				PongGameMode->RestartGame();
+			}
+		}
+		else
+		{
+			//send rematch request to server
+			ServerRequestRematch();
+		}
+	}
+}
+
+void APongPlayerController::ServerRequestRematch_Implementation()
+{
+	RequestRematch();
+}
+
+bool APongPlayerController::ServerRequestRematch_Validate()
+{
+	//Only valid if the game has ended. No restarting half way through
+	APongGameState* State = UPongBlueprintFunctionLibrary::GetPongGameState(this);
+	return State->GetState() == EGameState::Finished;
 }

@@ -37,7 +37,7 @@ public:
 	void ResetBall(AActor* Ball, ESides SpawnSide);
 
 	UFUNCTION(BlueprintCallable)
-	void SpawnAI(ESides Side);
+	APongAIController* SpawnAI(ESides Side);
 
 	UFUNCTION(BlueprintCallable)
 	AActor* GetBall();
@@ -72,9 +72,24 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RestartGame();
 
+	void PostLogin(APlayerController* NewPlayer) override;
+
+	void Tick(float DeltaSeconds) override;
+protected:
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	float StartingCountdown = 3;
+
 private:
 	UPROPERTY()
 	class APhysicsBall* Ball;
+
+	UPROPERTY()
+	APongAIController* AIController;
+
 	bool CheckWinState(ESides &Side);
 	TArray<FPongSpawnPoint> SpawnPoints;
+
+	FTimerHandle StartingCountdownTimerHandle;
+
+	int GetRequiredPlayerCount();
 };

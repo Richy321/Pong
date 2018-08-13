@@ -35,9 +35,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void Join(const FString& IPAddress);
-
+	
 	UFUNCTION(BlueprintCallable)
-	void Leave();
+	void LoadLobby();
 
 	UFUNCTION(BlueprintCallable)
 	void Quit();

@@ -23,7 +23,17 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void SetScore(const FGameScore& Score);
 	UFUNCTION(BlueprintImplementableEvent)
+	void UpdateStartingCountdown(const float CountdownTime);
+
+	UFUNCTION(BlueprintImplementableEvent)
 	void ShowGameFinishedUI(const FGameScore Result);
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShowGameStartingUI();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShowGameUI();
+	UFUNCTION(BlueprintImplementableEvent)
+	void HideGameUI();
 
 	void BeginPlay() override;
 	

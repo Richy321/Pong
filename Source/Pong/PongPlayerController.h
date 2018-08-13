@@ -38,6 +38,11 @@ public:
 
 	void SetupInputComponent() override;
 
+	UFUNCTION(BlueprintCallable)
+	void RequestRematch();
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerRequestRematch();
+
 private:
 	//UFUNCTION()
 	//	void Pause();

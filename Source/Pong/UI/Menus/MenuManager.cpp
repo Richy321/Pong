@@ -84,3 +84,12 @@ void UMenuManager::HandleMovement(float DeltaMovement)
 		}
 	}
 }
+
+UMenuScreenWidget* UMenuManager::GetScreenWidget(EMenuScreens Screen)
+{
+	if (Screens.Contains(Screen) && IsValid(Screens[Screen]))
+	{
+		return Screens[Screen];
+	}
+	return nullptr;
+}

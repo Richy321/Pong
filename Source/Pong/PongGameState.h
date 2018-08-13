@@ -13,6 +13,8 @@
 UENUM(BlueprintType)
 enum class EGameState : uint8
 {
+	Waiting,
+	Starting,
 	InGame,
 	Paused,
 	Finished
@@ -40,7 +42,10 @@ public:
 	ACameraActor* mainCamera;
 
 	UFUNCTION()
-	void UpdateScore();
+	void UpdateScoreUI();
+
+	UFUNCTION()
+	void UpdateStartingCountdownUI();
 
 	UFUNCTION()
 	int GetScore(ESides side);
@@ -57,14 +62,30 @@ public:
 	UFUNCTION()
 	void GameFinished();
 
+	UFUNCTION()
+	void GameStarting(float CountdownTime);
+
+	UFUNCTION()
+	void GameStarted();
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = UpdateStartingCountdownUI)
+	float StartingCountdownRemaining = 3;
+
 	void GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & OutLifetimeProps) const override;
 protected:
 	UPROPERTY(BlueprintReadWrite)
-	EGameState state;
+	EGameState state = EGameState::Waiting;
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = UpdateScore)
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = UpdateScoreUI)
 	FGameScore Score;
 
 	UFUNCTION(NetMulticast, reliable)
 	void BroadcastGameFinished(FGameScore result);
+
+	UFUNCTION(NetMulticast, reliable)
+	void BroadcastGameStarting();
+
+	UFUNCTION(NetMulticast, reliable)
+	void BroadcastGameStarted();
+
 };

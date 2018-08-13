@@ -40,12 +40,12 @@ void UPongGameInstance::Join(const FString& IPAddress)
 	}
 }
 
-void UPongGameInstance::Leave()
+void UPongGameInstance::LoadLobby()
 {
 	APlayerController* PlayerController = GetFirstLocalPlayerController(GetWorld());
 	if (IsValid(PlayerController))
 	{
-		PlayerController->ClientTravel("/Game/Lobby", ETravelType::TRAVEL_Absolute);
+		PlayerController->ClientTravel("/Game/LobbyLevel", ETravelType::TRAVEL_Absolute);
 		AppState = EAppState::Lobby;
 	}
 }
@@ -72,3 +72,4 @@ void UPongGameInstance::Quit()
 		pc->ConsoleCommand("quit");
 	}
 }
+

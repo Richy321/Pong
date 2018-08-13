@@ -6,6 +6,7 @@
 #include "PongPlayerController.h"
 #include "PongGameInstance.h"
 #include "GameScore.h"
+#include "PongGameMode.h"
 
 #include "UnrealNetwork.h"
 
@@ -27,7 +28,7 @@ void APongGameState::IncrementScore(ESides Side)
 	APongHUD* hud = UPongBlueprintFunctionLibrary::GetPongHUD(this);
 	if (Side != ESides::None)
 	{
-		UpdateScore();
+		UpdateScoreUI();
 	}
 }
 
@@ -47,12 +48,25 @@ void APongGameState::GetLifetimeReplicatedProps(TArray< FLifetimeProperty > & Ou
 
 	DOREPLIFETIME(APongGameState, mainCamera);
 	DOREPLIFETIME(APongGameState, Score);
+	DOREPLIFETIME(APongGameState, StartingCountdownRemaining);
 }
 
-void APongGameState::UpdateScore()
+void APongGameState::UpdateScoreUI()
 {
-	APongHUD* hud = UPongBlueprintFunctionLibrary::GetPongHUD(this);
-	hud->SetScore(Score);
+	APongHUD* HUD = UPongBlueprintFunctionLibrary::GetPongHUD(this);
+	if (IsValid(HUD))
+	{
+		HUD->SetScore(Score);
+	}
+}
+
+void APongGameState::UpdateStartingCountdownUI()
+{
+	APongHUD* HUD = UPongBlueprintFunctionLibrary::GetPongHUD(this);
+	if (IsValid(HUD))
+	{
+		HUD->UpdateStartingCountdown(StartingCountdownRemaining);
+	}
 }
 
 int APongGameState::GetScore(ESides side)
@@ -65,27 +79,56 @@ int APongGameState::GetScore(ESides side)
 	return 0;
 }
 
+void APongGameState::GameFinished()
+{
+	//EndMatch();
+	state = EGameState::Finished;
+	BroadcastGameFinished(Score);
+}
+
 void APongGameState::BroadcastGameFinished_Implementation(FGameScore Result)
 {
 	//show UI
 	APongHUD* PongHUD = UPongBlueprintFunctionLibrary::GetPongHUD(GetWorld());
 	if (IsValid(PongHUD))
 	{
+		PongHUD->HideGameUI();
 		PongHUD->ShowGameFinishedUI(Result);
 	}
-
-	//disable input
-	UPongGameInstance* PongGameInstance = UPongBlueprintFunctionLibrary::GetPongGameInstance(GetWorld());
-	APongPlayerController* PongPlayerController = PongGameInstance->GetPrimaryPlayerController();
-	PongPlayerController->DisableInput(PongPlayerController);
 }
 
-
-void APongGameState::GameFinished()
+void APongGameState::GameStarting(float CountdownTime)
 {
-	//EndMatch();
-	state = EGameState::Finished;
-	BroadcastGameFinished(Score);
+	StartingCountdownRemaining = CountdownTime;
+	state = EGameState::Starting;
+	BroadcastGameStarting();
+}
+
+void APongGameState::BroadcastGameStarting_Implementation()
+{
+	//show UI
+	APongHUD* PongHUD = UPongBlueprintFunctionLibrary::GetPongHUD(GetWorld());
+	if (IsValid(PongHUD))
+	{
+		PongHUD->ShowGameStartingUI();
+	}
+}
+
+void APongGameState::GameStarted()
+{
+	StartingCountdownRemaining = 1.0f;
+	state = EGameState::InGame;
+	BroadcastGameStarted();
+}
+
+void APongGameState::BroadcastGameStarted_Implementation()
+{
+	//show UI
+	APongHUD* PongHUD = UPongBlueprintFunctionLibrary::GetPongHUD(GetWorld());
+	if (IsValid(PongHUD))
+	{
+		PongHUD->ShowGameUI();
+	}
 }
 
 

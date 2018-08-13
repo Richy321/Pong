@@ -10,6 +10,7 @@
 #include "Runtime/Engine/Public/EngineUtils.h"
 #include "Runtime/AIModule/Classes/AIController.h"
 #include "Runtime/AIModule/Classes/Blueprint/AIBlueprintHelperLibrary.h"
+#include "TimerManager.h"
 
 #include "PongBlueprintFunctionLibrary.h"
 #include "PongGameState.h"
@@ -75,7 +76,7 @@ AActor* APongGameMode::SpawnBall()
 	return nullptr;
 }
 
-void APongGameMode::SpawnAI(ESides Side)
+APongAIController* APongGameMode::SpawnAI(ESides Side)
 {
 	if (IsValid(AIPawnClass))
 	{
@@ -87,19 +88,18 @@ void APongGameMode::SpawnAI(ESides Side)
 			FVector location = Pawn->GetActorLocation();
 			if (IsValid(Pawn->GetController()))
 			{
-				APongAIController* AIController = Cast<APongAIController>(Pawn->GetController());
-				if (IsValid(AIController))
+				APongAIController* NewAIController = Cast<APongAIController>(Pawn->GetController());
+				if (IsValid(NewAIController))
 				{
-					//AIController->UseBlackboard()
+					return NewAIController;
 				}
 			}
 
 		}
 	}
-	else
-	{
-		//log
-	}
+	UE_LOG(LogTemp, Warning, TEXT("%s - Failed to spawn AI controller"), *FString(__FUNCTION__));
+
+	return nullptr;
 }
 
 void APongGameMode::IncrementScore(ESides Side)
@@ -235,14 +235,37 @@ AActor* APongGameMode::GetBall()
 
 void APongGameMode::StartGame()
 {
-	//Spawn bots
-	if (MultiplayerGameType == EMultiplayerGameType::SinglePlayer)
+	APongGameState* PongState = UPongBlueprintFunctionLibrary::GetPongGameState(GetWorld());
+	if (IsValid(PongState))
 	{
-		SpawnAI(ESides::Right);
+		PongState->GameStarting(StartingCountdown);
 	}
 
-	AActor* NewBall = SpawnBall();
-	ResetBall(NewBall, ESides::None);
+	GetWorld()->GetTimerManager().ClearTimer(StartingCountdownTimerHandle);
+
+	FTimerDelegate DeactivateRepeatDelayCallback;
+	DeactivateRepeatDelayCallback.BindLambda([this]
+	{
+		//Spawn bots
+		if (MultiplayerGameType == EMultiplayerGameType::SinglePlayer)
+		{
+			if (!IsValid(AIController))
+			{
+				AIController = SpawnAI(ESides::Right);
+			}
+		}
+
+		SpawnBall();
+		ResetBall(Ball, ESides::None);
+		APongGameState* PongState = UPongBlueprintFunctionLibrary::GetPongGameState(GetWorld());
+		if (IsValid(PongState))
+		{
+			PongState->GameStarted();
+		}
+	});
+
+	FTimerHandle Handle;
+	GetWorld()->GetTimerManager().SetTimer(StartingCountdownTimerHandle, DeactivateRepeatDelayCallback, StartingCountdown, false);
 }
 
 void APongGameMode::RestartGame()
@@ -252,5 +275,67 @@ void APongGameMode::RestartGame()
 	{
 		PongState->ResetScore();
 	}
-	ResetBall(Ball, ESides::None);
+	StartGame();
+}
+
+void APongGameMode::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	if (!HasAuthority())
+		return;
+
+	APongGameState* PongState = UPongBlueprintFunctionLibrary::GetPongGameState(GetWorld());
+	if (IsValid(PongState))
+	{
+		if (PongState->GetState() == EGameState::Starting)
+		{
+			PongState->StartingCountdownRemaining = FMath::Max(1.0f, PongState->StartingCountdownRemaining - DeltaSeconds);
+			PongState->UpdateStartingCountdownUI();
+		}
+	}
+}
+
+int APongGameMode::GetRequiredPlayerCount()
+{
+	switch (MultiplayerGameType)
+	{
+	case EMultiplayerGameType::SinglePlayer:
+		return 1;
+	case EMultiplayerGameType::OnlineMultiplayer:
+	case EMultiplayerGameType::LocalMultiplayer:
+		switch (GameType)
+		{
+		case EGameType::TwoVsTwo:
+			return 4;
+		case EGameType::OneVsOne:
+		default:
+			return 2;
+		}
+	}
+	return 1;
+}
+
+void APongGameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+	APongGameState* PongState = UPongBlueprintFunctionLibrary::GetPongGameState(GetWorld());
+	if (IsValid(PongState))
+	{
+		//Check if all players have joined
+		if (PongState->GetState() == EGameState::Waiting)
+		{
+			if (PongState->PlayerArray.Num() == GetRequiredPlayerCount())
+			{
+				//Delay before calling StartGame to allow Client to be fully ready. 
+				//(hasn't finished initialising fully at this point for some reason)
+				FTimerDelegate DelayStartCallback;
+				DelayStartCallback.BindLambda([this]
+				{
+					StartGame();
+				});
+				FTimerHandle Handle;
+				GetWorld()->GetTimerManager().SetTimer(Handle, DelayStartCallback, 1.0f, false);
+			}
+		}
+	}
 }
