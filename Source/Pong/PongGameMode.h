@@ -58,12 +58,6 @@ public:
 
 	AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	EGameType GameType = EGameType::OneVsOne;
-
-	UPROPERTY(BlueprintReadOnly, EditAnywhere)
-	EMultiplayerGameType MultiplayerGameType = EMultiplayerGameType::SinglePlayer;
-
 	APlayerStart* GetFreePlayerStart(EGameType GameType, ESides Side);
 
 	UFUNCTION(BlueprintCallable)

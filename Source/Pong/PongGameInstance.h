@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Engine/GameInstance.h" 
+#include "GameTypesEnum.h"
 #include "PongGameInstance.generated.h"
 
 class APongPlayerController;
@@ -32,21 +33,22 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void Host();
-
 	UFUNCTION(BlueprintCallable)
 	void Join(const FString& IPAddress);
-	
 	UFUNCTION(BlueprintCallable)
 	void LoadLobby();
-
 	UFUNCTION(BlueprintCallable)
 	void Quit();
 
 	UFUNCTION(BlueprintCallable)
 	EAppState GetAppState() { return AppState; }
-
 	UFUNCTION(BlueprintCallable)
 	void SetAppState(EAppState NewState) { AppState = NewState; }
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	EGameType GameType = EGameType::OneVsOne;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	EMultiplayerGameType MultiplayerGameType = EMultiplayerGameType::OnlineMultiplayer;
 
 private:
 	EAppState AppState = EAppState::Loading;

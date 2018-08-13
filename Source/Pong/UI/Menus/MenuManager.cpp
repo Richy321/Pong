@@ -18,12 +18,13 @@ void UMenuManager::GoToScreen(EMenuScreens Screen)
 	if (Screens.Contains(Screen) && IsValid(Screens[Screen]))
 	{
 		Screens[Screen]->Show();
-		CurrentScreen = Screen;
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s - Trying to go to a screen without a set widget"), *FString(__FUNCTION__));
 	}
+
+	CurrentScreen = Screen;
 }
 
 template <typename T>

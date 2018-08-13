@@ -80,7 +80,9 @@ APongAIController* APongGameMode::SpawnAI(ESides Side)
 {
 	if (IsValid(AIPawnClass))
 	{
-		APlayerStart* Start = GetFreePlayerStart(GameType, Side);
+		UPongGameInstance* PongGameInstance = UPongBlueprintFunctionLibrary::GetPongGameInstance(GetWorld());
+
+		APlayerStart* Start = GetFreePlayerStart(PongGameInstance->GameType, Side);
 		if (IsValid(Start))
 		{
 			APawn* Pawn = UAIBlueprintHelperLibrary::SpawnAIFromClass(GetWorld(), AIPawnClass, nullptr, Start->GetActorLocation(), Start->GetActorRotation());
@@ -190,24 +192,23 @@ bool APongGameMode::ReadyToEndMatch_Implementation()
 PRAGMA_DISABLE_OPTIMIZATION
 AActor* APongGameMode::ChoosePlayerStart_Implementation(AController* Player)
 {
-	//TODO - tie into lobby
-
-	//Force Left player as PC and right as AI for time being
+	//Force left player as PC and right as AI 
+	UPongGameInstance* PongGameInstance = UPongBlueprintFunctionLibrary::GetPongGameInstance(GetWorld());
 
 	if (Player->IsA(APlayerController::StaticClass()))
 	{
 		//Try to take the left spot
-		APlayerStart* start = GetFreePlayerStart(GameType, ESides::Left);
+		APlayerStart* start = GetFreePlayerStart(PongGameInstance->GameType, ESides::Left);
 		if (!start)
 		{
 			//if not available try the right
-			start = GetFreePlayerStart(GameType, ESides::Right);
+			start = GetFreePlayerStart(PongGameInstance->GameType, ESides::Right);
 		}
 		return start;
 	}
 	else if (Player->IsA(AAIController::StaticClass()))
 	{
-		return GetFreePlayerStart(GameType, ESides::Right);
+		return GetFreePlayerStart(PongGameInstance->GameType, ESides::Right);
 	}
 
 	return nullptr;
@@ -246,8 +247,9 @@ void APongGameMode::StartGame()
 	FTimerDelegate DeactivateRepeatDelayCallback;
 	DeactivateRepeatDelayCallback.BindLambda([this]
 	{
+		UPongGameInstance* PongGameInstance = UPongBlueprintFunctionLibrary::GetPongGameInstance(GetWorld());
 		//Spawn bots
-		if (MultiplayerGameType == EMultiplayerGameType::SinglePlayer)
+		if (PongGameInstance->MultiplayerGameType == EMultiplayerGameType::SinglePlayer)
 		{
 			if (!IsValid(AIController))
 			{
@@ -297,13 +299,14 @@ void APongGameMode::Tick(float DeltaSeconds)
 
 int APongGameMode::GetRequiredPlayerCount()
 {
-	switch (MultiplayerGameType)
+	UPongGameInstance* PongGameInstance = UPongBlueprintFunctionLibrary::GetPongGameInstance(GetWorld());
+	switch (PongGameInstance->MultiplayerGameType)
 	{
 	case EMultiplayerGameType::SinglePlayer:
 		return 1;
 	case EMultiplayerGameType::OnlineMultiplayer:
 	case EMultiplayerGameType::LocalMultiplayer:
-		switch (GameType)
+		switch (PongGameInstance->GameType)
 		{
 		case EGameType::TwoVsTwo:
 			return 4;

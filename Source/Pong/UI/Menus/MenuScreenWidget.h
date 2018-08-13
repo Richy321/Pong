@@ -38,9 +38,9 @@ public:
 
 	void SelectHighlighted();
 
+	void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
 protected:
-
-
 	UPROPERTY(BlueprintReadOnly)
 	int HighlightedIndex = 0;
 
@@ -51,6 +51,5 @@ private:
 	TArray<UMenuButtonWidget*> MenuItems;
 
 	void ResetRepeatTimer();
-	FTimerHandle RepeatDelayHandle;
-	bool bIsRepeatDelayActive = false;
+	float RepeatDelayTimer = 0.0f;
 };

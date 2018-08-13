@@ -243,6 +243,8 @@ void APongPlayerController::TogglePause()
 	switch (State->GetState())
 	{
 	case EGameState::InGame:
+	case EGameState::Waiting:
+	case EGameState::Starting:
 		if (SetPause(true))
 		{
 			State->Pause();

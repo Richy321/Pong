@@ -25,7 +25,8 @@ void UMenuScreenWidget::SetHighlightIndex(int Index)
 
 void UMenuScreenWidget::HighlightNext()
 {
-	if (bIsRepeatDelayActive)
+	//early out if we are delaying between calls
+	if (RepeatDelayTimer > 0)
 	{
 		return;
 	}
@@ -43,7 +44,8 @@ void UMenuScreenWidget::HighlightNext()
 
 void UMenuScreenWidget::HighlightPrevious()
 {
-	if (bIsRepeatDelayActive)
+	//early out if we are delaying between calls
+	if (RepeatDelayTimer > 0)
 	{
 		return;
 	}
@@ -78,14 +80,20 @@ void UMenuScreenWidget::AddMenuButtonWidget(UMenuButtonWidget* button)
 
 void UMenuScreenWidget::ResetRepeatTimer()
 {
-	bIsRepeatDelayActive = true;
-	GetWorld()->GetTimerManager().ClearTimer(RepeatDelayHandle);
+	RepeatDelayTimer = RepeatDelay;
+	UE_LOG(LogTemp, Warning, TEXT("%s - Setting bIsRepeatDelayActive"), *FString(__FUNCTION__));
+}
 
-	FTimerDelegate DeactivateRepeatDelayCallback;
-	DeactivateRepeatDelayCallback.BindLambda([this]
+void UMenuScreenWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	//reduce repeat delay here to allow use whilst paused.
+	if (RepeatDelayTimer > 0.0f)
 	{
-		bIsRepeatDelayActive = false;
-	});
-
-	GetWorld()->GetTimerManager().SetTimer(RepeatDelayHandle, DeactivateRepeatDelayCallback, RepeatDelay, false);
+		RepeatDelayTimer = FMath::Max(0.0f, RepeatDelayTimer - InDeltaTime);
+		if (RepeatDelayTimer <= 0)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s - Releasing bIsRepeatDelayActive"), *FString(__FUNCTION__));
+		}
+	}
+	Super::NativeTick(MyGeometry, InDeltaTime);
 }
