@@ -150,4 +150,5 @@ void APongGameState::ResetScore()
 		Score.ScoreLeft = 0;
 		Score.ScoreRight = 0;
 	}
+	UpdateScoreUI();
 }
