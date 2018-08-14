@@ -362,3 +362,10 @@ void APongGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	GetWorld()->GetTimerManager().ClearTimer(JoinStartDelayTimerHandle);
 	GetWorld()->GetTimerManager().ClearTimer(ServeDelayTimerHandle);
 }
+
+void APongGameMode::Logout(AController* Exiting)
+{
+	//if a player logouts, just quit to lobby for ease
+	UPongGameInstance* PongGameInstance = UPongBlueprintFunctionLibrary::GetPongGameInstance(GetWorld());
+	PongGameInstance->LoadLobby();
+}

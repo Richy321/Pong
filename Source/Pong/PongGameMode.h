@@ -71,6 +71,7 @@ public:
 
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
+	void Logout(AController* Exiting) override;
 protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	float StartingCountdown = 3;

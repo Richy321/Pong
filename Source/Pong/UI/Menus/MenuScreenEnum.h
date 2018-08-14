@@ -8,5 +8,6 @@ enum class EMenuScreens : uint8
 	PauseMenu,
 	EndGameMenu,
 	DifficultyMenu,
-	LoadingMenu
+	LoadingMenu,
+	IPEntryMenu
 };
