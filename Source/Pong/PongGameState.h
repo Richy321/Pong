@@ -36,9 +36,6 @@ public:
 
 	void BeginPlay() override;
 
-	UPROPERTY(BlueprintReadOnly, replicated)
-	ACameraActor* MainCamera;
-
 	void IncrementScore(ESides Side);
 	UFUNCTION()
 	int GetScore(ESides Side);

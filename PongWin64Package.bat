@@ -1,5 +1,5 @@
 @ECHO OFF
-SET config=Development
+SET config=Shipping
 SET project=J:/Projects/Pong/Pong.uproject
 SET targetPlatform=Win64
 

@@ -16,8 +16,6 @@ class PONG_API APongPlayerController : public APlayerController
 public:
 	APongPlayerController();
 
-	void BeginPlay() override;
-
 	void HandleMovement(float MovementDelta);
 	void HandleSelect();
 	void HandleBack();

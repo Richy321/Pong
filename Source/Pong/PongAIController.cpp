@@ -136,7 +136,8 @@ void APongAIController::MoveTowards(float TargetZ, float DeltaTime)
 
 	FVector PaddleLocation = Pawn->GetActorLocation();
 
-	if (!FMath::IsNearlyEqual(PaddleLocation.Z, TargetZ))
+	float Tolerance = 1.0f;
+	if (!FMath::IsNearlyEqual(PaddleLocation.Z, TargetZ, Tolerance))
 	{
 		float ZDistanceToTarget = (TargetZ - PaddleLocation.Z);
 		if (ZDistanceToTarget > 0.0f)

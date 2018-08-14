@@ -46,7 +46,6 @@ void APongGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(APongGameState, MainCamera);
 	DOREPLIFETIME(APongGameState, Score);
 	DOREPLIFETIME(APongGameState, StartingCountdownRemaining);
 }

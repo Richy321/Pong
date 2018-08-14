@@ -22,7 +22,7 @@ public:
 	APongGameMode();
 
 	UFUNCTION(BlueprintCallable)
-	void Init(class ACameraActor* MainCamera, FVector HalfwayLineStart, FVector HalfwayLineEnd);
+	void Init(FVector HalfwayLineStart, FVector HalfwayLineEnd);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<APhysicsBall> BallClass;

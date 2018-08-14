@@ -25,15 +25,6 @@ void APongPlayerController::SetupInputComponent()
 	InputComponent->BindAction("Select", IE_Pressed, this, &APongPlayerController::HandleSelect).bExecuteWhenPaused = true;
 	InputComponent->BindAction("Back", IE_Pressed, this, &APongPlayerController::HandleBack).bExecuteWhenPaused = true;
 }
-void APongPlayerController::BeginPlay()
-{
-	//Set main camera as players view 
-	APongGameState* GameState = UPongBlueprintFunctionLibrary::GetPongGameState(this);
-	if (GameState)
-	{
-		SetViewTarget(GameState->MainCamera);
-	}
-}
 
 void APongPlayerController::ServerVerticalMovement_Implementation(float DeltaMovement)
 {

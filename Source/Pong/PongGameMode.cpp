@@ -3,7 +3,6 @@
 #include "PongGameMode.h"
 
 #include "Engine/World.h"
-#include "Camera/CameraActor.h"
 #include "Classes/Kismet/GameplayStatics.h"
 #include "Classes/GameFramework/PlayerStart.h"
 #include "GameFramework/ProjectileMovementComponent.h"
@@ -184,18 +183,10 @@ bool APongGameMode::CheckWinState(ESides &WinningSide)
 	return false;
 }
 
-void APongGameMode::Init(ACameraActor* Camera, FVector HalfwayLineStart, FVector HalfwayLineEnd)
+void APongGameMode::Init(FVector HalfwayLineStart, FVector HalfwayLineEnd)
 {
-	if (!IsValid(Camera))
-	{
-		//log
-		return;
-	}
-	
 	SpawnLineStart = HalfwayLineStart;
 	SpawnLineEnd = HalfwayLineEnd;
-	APongGameState* PongState = UPongBlueprintFunctionLibrary::GetPongGameState(this);
-	PongState->MainCamera = Camera;
 }
 
 bool APongGameMode::ReadyToStartMatch_Implementation()
