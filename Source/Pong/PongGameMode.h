@@ -25,16 +25,13 @@ public:
 	void Init(class ACameraActor* MainCamera, FVector HalfwayLineStart, FVector HalfwayLineEnd);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSubclassOf<AActor> BallClass;
+	TSubclassOf<APhysicsBall> BallClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSubclassOf<APawn> AIPawnClass;
 		
 	UFUNCTION(BlueprintCallable)
-	AActor* SpawnBall();
-
-	UFUNCTION(BlueprintCallable)
-	void ResetBall(AActor* Ball, ESides SpawnSide);
+	APhysicsBall* SpawnBall();
 
 	UFUNCTION(BlueprintCallable)
 	APongAIController* SpawnAI(ESides Side);
@@ -48,6 +45,8 @@ public:
 	//Rules
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int NumGoalsToWin = 10;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float ServeDelay = 1.0f;
 
 	void IncrementScore(ESides Side);
 
@@ -71,11 +70,16 @@ public:
 	void Tick(float DeltaSeconds) override;
 
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere)
 	float StartingCountdown = 3;
 
 private:
+
+	void ResetBall(APhysicsBall* Ball, ESides SpawnSide);
+	void Serve(APhysicsBall* Ball, ESides SpawnSide, float DelayServeTime);
+
 	UPROPERTY()
 	APhysicsBall* Ball;
 
@@ -86,5 +90,6 @@ private:
 
 	FTimerHandle StartingCountdownTimerHandle;
 	FTimerHandle JoinStartDelayTimerHandle;
+	FTimerHandle ServeDelayTimerHandle;
 	int GetRequiredPlayerCount();
 };

@@ -27,7 +27,7 @@ public:
 		static class APongGameMode* GetPongGameMode(const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintCallable, Category = "Util")
-		static void AddOnScreenDebugMessage(FString Text, int Index = -1, float TimeToDisplay = 4.0f, FLinearColor Colour = FLinearColor::Red, bool NewerOnTop = true, FVector2D TextScale = FVector2D::UnitVector);
+		static void AddOnScreenDebugMessage(FString Text, int Index = -1, float TimeToDisplay = 4.0f, FLinearColor Colour = FLinearColor::Red, bool NewerOnTop = false, FVector2D TextScale = FVector2D::UnitVector);
 
 	template<typename T>
 	static T* GetDervivedHUD(const UObject* WorldContextObject);

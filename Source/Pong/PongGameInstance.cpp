@@ -27,8 +27,6 @@ void UPongGameInstance::Join(const FString& IPAddress)
 	UEngine* Engine = GetEngine();
 	if (!ensure(Engine != nullptr)) return;
 
-	Engine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("Joining IP: %s"), *IPAddress));
-
 	UWorld* World = GetWorld();
 	if (!ensure(World != nullptr)) return;
 
@@ -53,8 +51,6 @@ void UPongGameInstance::Host()
 {
 	UEngine* Engine = GetEngine();
 	if (!ensure(Engine != nullptr)) return;
-
-	Engine->AddOnScreenDebugMessage(0, 2, FColor::Green, TEXT("Hosting"));
 
 	UWorld* World = GetWorld();
 	if (!ensure(World != nullptr)) return;

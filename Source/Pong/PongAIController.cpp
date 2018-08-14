@@ -7,7 +7,6 @@
 #include "PhysicsBall.h"
 #include "DrawDebugHelpers.h"
 
-
 APongAIController::APongAIController() :
 	EasyDifficultySettings(2.0f, 3.0f, -1.0f, 1.0f),
 	NormalDifficultySettings(1.0f, 2.0f, -0.75f, 0.75f),
@@ -22,9 +21,8 @@ void APongAIController::BeginPlay()
 	if (IsValid(GameMode))
 	{
 		SpawnLineYPosition = GameMode->SpawnLineStart.Y;
+		SetDifficulty(CurrentDifficulty);
 	}
-
-	RandomiseDifficulty();
 }
 
 void APongAIController::Tick(float DeltaTime)
@@ -33,6 +31,11 @@ void APongAIController::Tick(float DeltaTime)
 	APongGameMode* GameMode = UPongBlueprintFunctionLibrary::GetPongGameMode(this);
 	if (!IsValid(GameMode))
 		return;
+
+	if (bIsShowDifficultySettings)
+	{
+		DrawDifficultySettings();
+	}
 
 	APhysicsBall* Ball = GameMode->GetBall();
 	APongPawn* Pawn = Cast<APongPawn>(GetPawn());
@@ -58,48 +61,64 @@ void APongAIController::Tick(float DeltaTime)
 		if (!bIsBallMovingTowards)
 		{		
 			//Reset Reaction and Accuracy
-			CurrentReactionTime = -1;
+			CurrentReaction = -1;
+			CurrentReactionTime = 0.0f;
 			CurrentAccuracy = -1;
 		}
 		else
 		{
 			//get a new reaction for this hit
-			if (CurrentReactionTime == -1)
+			if (CurrentReaction == -1)
 			{
-				CurrentReactionTime = GetReaction();
+				CurrentReaction = GetNewReaction();
+				CurrentReactionTime = CurrentReaction;
+
+				//half reaction time if it's a serve to give AI more of a chance as
+				//it's half the distance
+				if (Ball->LastHitter == nullptr)
+				{
+					CurrentReactionTime = 0.5f;
+				}
 			}
 
 			//get a new accuracy for this hit
 			if (CurrentAccuracy == -1)
 			{
-				CurrentAccuracy = GetAccuracy();
+				CurrentAccuracy = GetNewAccuracy();
 			}
 
-
-
-			//Avoid the AI squishing the ball against the side if it has already passed the front of the paddle
-			//Also resets paddle to center upon a goal
-			if (bIsLeft && (BallLocation.Y < Pawn->GetActorLocation().Y + Pawn->GetPaddleWidth()) ||
-				!bIsLeft && (BallLocation.Y > Pawn->GetActorLocation().Y - Pawn->GetPaddleWidth()))
-			{
-				//move pawn back to original spawn position
-				MoveTowards(OriginalPosition.Z, DeltaTime);
-			}
-			
-
-			//if we change direction (hit a wall) recalc new target position
+			//if the ball changed direction (hit a wall) recalc new target position
 			if (!BallDirection.Equals(LastDirection, 0.001f))
 			{
 				TargetLocation = FMath::LinePlaneIntersection(BallLocation, BallLocation + BallDirection * 1000.0f,
 					OriginalPosition, FVector(0.0f, 1.0f, 0.0f)); //+ive Y Plane at original position
-				
+
 				LastDirection = BallDirection;
 
 				//DrawDebugSphere(GetWorld(), TargetLocation, 50, 32, FColor::Red, false, 1.0f);
-				
+
 				//Modify target buy accuracy based on paddle size
 				float AccuracyModifier = Pawn->GetPaddleHeight() * CurrentAccuracy;
 				TargetLocation.Z += AccuracyModifier;
+			}
+
+			//Avoid the AI squishing the ball against the side if it has already passed the front of the paddle
+			//Also resets paddle to center upon a goal
+			float epsilon = 2.0f;
+			FVector PaddleLocation = Pawn->GetActorLocation();
+			float PaddleWidth = Pawn->GetPaddleWidth();
+
+			if ((bIsLeft && (BallLocation.Y < PaddleLocation.Y + PaddleWidth + epsilon)) ||
+				(!bIsLeft && (BallLocation.Y > PaddleLocation.Y - PaddleWidth + epsilon)))
+			{
+				//Reset Reaction and Accuracy ready for serve
+				CurrentReactionTime = 0.0f;
+				CurrentReaction = -1;
+				CurrentAccuracy = -1;
+				LastDirection = FVector::ZeroVector;
+				
+				//Set targett to original spawn position
+				TargetLocation = OriginalPosition;
 			}
 			
 			MoveTowards(TargetLocation.Z, DeltaTime);
@@ -144,25 +163,11 @@ void APongAIController::SetPawn(APawn* InPawn)
 void APongAIController::SetDifficulty(EAIDifficulty NewDifficulty)
 {
 	CurrentDifficulty = NewDifficulty;
-	RandomiseDifficulty();
 }
 
-void APongAIController::RandomiseDifficulty()
+void APongAIController::ShowDifficultySettings(bool Show)
 {
-	const FAIDifficultySettings& DifficultSettings = GetCurrentDifficultySettings();
-	ReactionUpper = FMath::RandRange(DifficultSettings.ReactionMinimum, DifficultSettings.ReactionMaximum);
-	ReactionLower = FMath::RandRange(DifficultSettings.ReactionMinimum, DifficultSettings.ReactionMaximum);
-	if (ReactionUpper < ReactionLower)
-	{
-		Swap(ReactionUpper, ReactionLower);
-	}
-
-	AccuracyUpper = FMath::RandRange(DifficultSettings.AccuracyMinimum, DifficultSettings.AccuracyMaximum);
-	AccuracyLower = FMath::RandRange(DifficultSettings.AccuracyMinimum, DifficultSettings.AccuracyMaximum);
-	if (AccuracyUpper < AccuracyLower)
-	{
-		Swap(AccuracyUpper, AccuracyLower);
-	}
+	bIsShowDifficultySettings = Show;
 }
 
 const FAIDifficultySettings& APongAIController::GetCurrentDifficultySettings()
@@ -180,12 +185,25 @@ const FAIDifficultySettings& APongAIController::GetCurrentDifficultySettings()
 	}
 }
 
-float APongAIController::GetReaction()
+float APongAIController::GetNewReaction()
 {
-	return FMath::RandRange(ReactionLower, ReactionUpper);
+	return FMath::RandRange(GetCurrentDifficultySettings().ReactionMinimum, GetCurrentDifficultySettings().ReactionMaximum);
 }
 
-float APongAIController::GetAccuracy()
+float APongAIController::GetNewAccuracy()
 {
-	return FMath::RandRange(AccuracyLower, AccuracyUpper);
+	return FMath::RandRange(GetCurrentDifficultySettings().AccuracyMinimum, GetCurrentDifficultySettings().AccuracyMaximum);
+}
+
+void APongAIController::DrawDifficultySettings()
+{
+	const FAIDifficultySettings&  CurrentDifficultySettings = GetCurrentDifficultySettings();
+	FString DifficultyLevelText = "DifficultyLevel:" + AIDifficultyEnumToString(CurrentDifficulty);
+	UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage(DifficultyLevelText, 0);
+
+	FString ReactionText = FString::Printf(TEXT("Reaction:  %f (%f) (%f-%f)"), CurrentReaction, CurrentReactionTime, CurrentDifficultySettings.ReactionMinimum, CurrentDifficultySettings.ReactionMaximum);
+	UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage(ReactionText, 1);
+
+	FString AccuracyText = FString::Printf(TEXT("Accuracy: %f (%f-%f)"), CurrentAccuracy, CurrentDifficultySettings.AccuracyMinimum, CurrentDifficultySettings.AccuracyMaximum);
+	UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage(AccuracyText, 2);
 }

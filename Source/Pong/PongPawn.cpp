@@ -31,10 +31,9 @@ void APongPawn::BeginPlay()
 	{
 		MainMeshComponent->OnComponentHit.AddDynamic(this, &APongPawn::HandleOnComponentHit);
 
-		FVector Min, Max;
-		MainMeshComponent->GetLocalBounds(Min, Max);
-		PaddleHeight = Max.Z - Min.Z;
-		PaddleWidth = Max.Y - Min.Y;
+		FBox Bounds = GetComponentsBoundingBox();
+		PaddleHeight = Bounds.Max.Z - Bounds.Min.Z;
+		PaddleWidth = Bounds.Max.Y - Bounds.Min.Y;
 	}
 }
 
@@ -48,6 +47,9 @@ void APongPawn::HandleOnComponentHit(UPrimitiveComponent* HitComponent, AActor* 
 {
 	if (OtherActor->IsA(APhysicsBall::StaticClass()))
 	{
+		APhysicsBall* Ball = Cast<APhysicsBall>(OtherActor);
+		Ball->LastHitter = GetController();
+
 		FVector LocalImpactPoint = HitComponent->GetComponentTransform().Inverse().TransformPosition(Hit.ImpactPoint);
 
 		//get percentage of whole height
@@ -73,7 +75,6 @@ void APongPawn::HandleOnComponentHit(UPrimitiveComponent* HitComponent, AActor* 
 				FVector Direction = FVector(0.0f, XPos, YPos);
 				Direction.Normalize();
 				ProjectileComponent->Velocity = Direction * ImpluseScalar;
-				UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage(FString::Printf(TEXT("Velocity: %s"), *ProjectileComponent->Velocity.ToCompactString()));
 			}
 		}
 	}

@@ -26,13 +26,18 @@ APongGameMode::APongGameMode()
 
 }
 
-void APongGameMode::ResetBall(AActor* Ball, ESides SpawnSide)
+void APongGameMode::ResetBall(APhysicsBall* Ball, ESides SpawnSide)
 {
 	//pick random point along line
 	FVector SpawnPoint;
+	
+	//clear last hitter to indicate serve
+	Ball->LastHitter = nullptr;
 
-	float RandF = FMath::RandRange(0.0f, 1.0f);
+	//Pick a random point on the line avoiding the end and beginning 25%
+	float RandF = FMath::RandRange(0.25f, 0.75f);
 	FVector Line = (SpawnLineEnd - SpawnLineStart);
+
 	Line = SpawnLineStart + (Line * RandF);
 
 	float Direction = 0.0f;
@@ -48,6 +53,7 @@ void APongGameMode::ResetBall(AActor* Ball, ESides SpawnSide)
 		Direction = 1;
 		break;
 	}
+
 	Ball->SetActorLocation(Line);
 	UActorComponent* ActorComponent = Ball->GetComponentByClass(UProjectileMovementComponent::StaticClass());
 	if (IsValid(ActorComponent))
@@ -60,7 +66,27 @@ void APongGameMode::ResetBall(AActor* Ball, ESides SpawnSide)
 	}
 }
 
-AActor* APongGameMode::SpawnBall()
+void APongGameMode::Serve(APhysicsBall* Ball, ESides SpawnSide, float DelayServeTime)
+{
+	if (DelayServeTime > 0.0f)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(ServeDelayTimerHandle);
+
+		//Delay Serve
+		FTimerDelegate DelayStartCallback;
+		DelayStartCallback.BindLambda([this, Ball, SpawnSide]
+		{
+			ResetBall(Ball, SpawnSide);
+		});
+		GetWorld()->GetTimerManager().SetTimer(ServeDelayTimerHandle, DelayStartCallback, DelayServeTime, false);
+	}
+	else
+	{
+		ResetBall(Ball, SpawnSide);
+	}
+}
+
+APhysicsBall* APongGameMode::SpawnBall()
 {
 	if (IsValid(BallClass))
 	{
@@ -134,7 +160,7 @@ void APongGameMode::IncrementScore(ESides Side)
 				ServeSide = ESides::Left;
 			}
 
-			ResetBall(Ball, ServeSide);
+			Serve(Ball, ServeSide, ServeDelay);
 		}
 	}
 }
@@ -343,6 +369,5 @@ void APongGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	GetWorld()->GetTimerManager().ClearTimer(StartingCountdownTimerHandle);
 	GetWorld()->GetTimerManager().ClearTimer(JoinStartDelayTimerHandle);
-	
-	GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
+	GetWorld()->GetTimerManager().ClearTimer(ServeDelayTimerHandle);
 }

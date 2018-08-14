@@ -20,6 +20,10 @@ public:
 	
 	virtual void Tick(float DeltaTime) override;
 
+	//Last player controller to hit the ball. nullptr indicates a serve
+	UPROPERTY()
+	AController* LastHitter;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

@@ -60,29 +60,31 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	EAIDifficulty CurrentDifficulty = EAIDifficulty::Normal;
+
+	UFUNCTION(BlueprintCallable)
+	void ShowDifficultySettings(bool Show);
+
 private:
 	void MoveTowards(float TargetZ, float DeltaTime);
 
-	void RandomiseDifficulty();
 	const FAIDifficultySettings& GetCurrentDifficultySettings();
+
+	void DrawDifficultySettings();
 
 	FVector OriginalPosition;
 	bool bIsLeft;
 	
 	float SpawnLineYPosition;
 
-	float ReactionUpper;
-	float ReactionLower;
-
-	float AccuracyUpper;
-	float AccuracyLower;
-
-	float GetReaction();
-	float GetAccuracy();
+	float GetNewReaction();
+	float GetNewAccuracy();
 
 	float CurrentAccuracy = -1.0f;
+	float CurrentReaction = -1.0f;
 	float CurrentReactionTime = -1.0f;
 
 	FVector LastDirection;
 	FVector TargetLocation;
+
+	bool bIsShowDifficultySettings = false;
 };
