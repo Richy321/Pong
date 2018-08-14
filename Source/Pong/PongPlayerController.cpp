@@ -28,7 +28,6 @@ void APongPlayerController::SetupInputComponent()
 void APongPlayerController::BeginPlay()
 {
 	//Set main camera as players view 
-	
 	APongGameState* GameState = UPongBlueprintFunctionLibrary::GetPongGameState(this);
 	if (GameState)
 	{
@@ -172,69 +171,6 @@ void APongPlayerController::HandleBack()
 	}
 }
 
-//void APongPlayerController::Pause()
-//{
-//	APongGameState* state = UPongBlueprintFunctionLibrary::GetPongGameState(this);
-//	if (state->GetState() == EGameState::Paused)
-//	{
-//		return;
-//	}
-//
-//	if (Role == ENetRole::ROLE_Authority)
-//	{
-//		//On the server directly, pause the game
-//		state->GetState()
-//
-//	}
-//	else
-//	{
-//		//Not on the server, request the server to make the movement (and replicate it back to the client)
-//		ServerPause();
-//	}
-//}
-//
-//void APongPlayerController::UnPause()
-//{
-//	APongGameState* state = UPongBlueprintFunctionLibrary::GetPongGameState(this);
-//	if (state->GetState() != EGameState::Paused)
-//	{
-//		return;
-//	}
-//
-//	if (Role == ENetRole::ROLE_Authority)
-//	{
-//		//On the server directly, pause the game
-//
-//
-//	}
-//	else
-//	{
-//		//Not on the server, request the server to make the movement (and replicate it back to the client)
-//		ServerPause();
-//	}
-//}
-
-
-//void APongPlayerController::ServerPause_Implementation()
-//{
-//	//BroadcastPause();
-//}
-//
-//bool APongPlayerController::ServerPause_Validate()
-//{
-//	return true;
-//}
-//
-//void APongPlayerController::ServerUnPause_Implementation()
-//{
-//	//BroadcastUnPause();
-//}
-//
-//bool APongPlayerController::ServerUnPause_Validate()
-//{
-//	return true;
-//}
-
 void APongPlayerController::TogglePause()
 {
 	UPongGameInstance* PongGameInstance = UPongBlueprintFunctionLibrary::GetPongGameInstance(GetWorld());
@@ -250,29 +186,14 @@ void APongPlayerController::TogglePause()
 	case EGameState::Waiting:
 	case EGameState::Starting:
 		Pause();
-		//if (SetPause(true))
-		{
-			State->Pause();
-			UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage("Paused Successfully");
-		}
-		//else
-		//{
-		//	UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage("Pause failed");
-		//}
-
+		State->Pause();
+		UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage("Paused Successfully");
 		PongHUD->MenuManager->GoToScreen(EMenuScreens::PauseMenu);
 		break;
 	case EGameState::Paused:
 		Pause();
-		//if (SetPause(false))
-		{
-			State->UnPause();
-			UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage("UnPaused Successfully");
-		}
-		//else
-		//{
-		//	UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage("UnPause failed");
-		//}
+		State->UnPause();
+		UPongBlueprintFunctionLibrary::AddOnScreenDebugMessage("UnPaused Successfully");
 		PongHUD->MenuManager->GoToScreen(EMenuScreens::None);
 		break;
 	default:

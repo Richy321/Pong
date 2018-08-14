@@ -40,19 +40,4 @@ public:
 	void RequestRematch();
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerRequestRematch();
-
-private:
-	//UFUNCTION()
-	//	void Pause();
-	//UFUNCTION(Server, Reliable, WithValidation)
-	//	void ServerPause();
-	//UFUNCTION(NetMulticast, Reliable)
-	//	void BroadcastPause();
-
-	//UFUNCTION()
-	//	void UnPause();
-	//UFUNCTION(Server, Reliable, WithValidation)
-	//	void ServerUnPause();
-	//UFUNCTION(NetMulticast, Reliable)
-	//	void BroadcastUnPause();
 };

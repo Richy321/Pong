@@ -36,7 +36,6 @@ void UPongGameInstance::Join(const FString& IPAddress)
 	if (IsValid(PlayerController))
 	{
 		PlayerController->ClientTravel(IPAddress, ETravelType::TRAVEL_Absolute);
-		AppState = EAppState::Game;
 	}
 }
 
@@ -61,7 +60,6 @@ void UPongGameInstance::Host()
 	if (!ensure(World != nullptr)) return;
 
 	World->ServerTravel("/Game/MainLevel?listen");
-	AppState = EAppState::Game;
 }
 
 void UPongGameInstance::Quit()

@@ -242,6 +242,7 @@ void APongGameMode::StartGame()
 		if (!IsValid(AIController))
 		{
 			AIController = SpawnAI(ESides::Right);
+			AIController->SetDifficulty(PongGameInstance->AIDifficulty);
 		}
 	}
 
@@ -303,12 +304,9 @@ int APongGameMode::GetRequiredPlayerCount()
 	{
 	case EMultiplayerGameType::SinglePlayer:
 		return 1;
-	case EMultiplayerGameType::OnlineMultiplayer:
-	case EMultiplayerGameType::LocalMultiplayer:
+	case EMultiplayerGameType::Multiplayer:
 		switch (PongGameInstance->GameType)
 		{
-		case EGameType::TwoVsTwo:
-			return 4;
 		case EGameType::OneVsOne:
 		default:
 			return 2;

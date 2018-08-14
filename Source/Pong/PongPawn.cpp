@@ -33,23 +33,9 @@ void APongPawn::BeginPlay()
 
 		FVector Min, Max;
 		MainMeshComponent->GetLocalBounds(Min, Max);
-		float PaddleHeight = Max.Z - Min.Z;
-		PaddleHeightHalf = PaddleHeight / 2.0f;
+		PaddleHeight = Max.Z - Min.Z;
+		PaddleWidth = Max.Y - Min.Y;
 	}
-}
-
-// Called every frame
-void APongPawn::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
-// Called to bind functionality to input
-void APongPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
 void APongPawn::VerticalMovement(float MovementDelta)
@@ -65,7 +51,7 @@ void APongPawn::HandleOnComponentHit(UPrimitiveComponent* HitComponent, AActor* 
 		FVector LocalImpactPoint = HitComponent->GetComponentTransform().Inverse().TransformPosition(Hit.ImpactPoint);
 
 		//get percentage of whole height
-		float zPositionPerc = LocalImpactPoint.Z / PaddleHeightHalf;
+		float zPositionPerc = LocalImpactPoint.Z / (PaddleHeight*0.5f);
 
 		//sample position from curve and invert due to curve shape
 		float ReflectionScaler = 1.0f - ReflectionCurve->GetFloatValue(FMath::Abs(zPositionPerc));

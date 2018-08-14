@@ -81,19 +81,14 @@ void UMenuScreenWidget::AddMenuButtonWidget(UMenuButtonWidget* Button)
 void UMenuScreenWidget::ResetRepeatTimer()
 {
 	RepeatDelayTimer = RepeatDelay;
-	UE_LOG(LogTemp, Warning, TEXT("%s - Setting bIsRepeatDelayActive"), *FString(__FUNCTION__));
 }
 
 void UMenuScreenWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
-	//reduce repeat delay here to allow use whilst paused.
+	//reduce repeat delay in tick instead of timer (Can't use timers whilst paused)
 	if (RepeatDelayTimer > 0.0f)
 	{
 		RepeatDelayTimer = FMath::Max(0.0f, RepeatDelayTimer - InDeltaTime);
-		if (RepeatDelayTimer <= 0)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("%s - Releasing bIsRepeatDelayActive"), *FString(__FUNCTION__));
-		}
 	}
 	Super::NativeTick(MyGeometry, InDeltaTime);
 }

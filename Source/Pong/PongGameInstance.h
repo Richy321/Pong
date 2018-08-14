@@ -3,7 +3,9 @@
 #pragma once
 
 #include "Engine/GameInstance.h" 
+
 #include "GameTypesEnum.h"
+#include "AIDifficultyEnum.h"
 #include "PongGameInstance.generated.h"
 
 class APongPlayerController;
@@ -15,7 +17,6 @@ enum class EAppState : uint8
 	Lobby,
 	Game
 };
-
 
 /**
  * 
@@ -48,7 +49,10 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	EGameType GameType = EGameType::OneVsOne;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	EMultiplayerGameType MultiplayerGameType = EMultiplayerGameType::OnlineMultiplayer;
+	EMultiplayerGameType MultiplayerGameType = EMultiplayerGameType::Multiplayer;
+
+	UPROPERTY(BlueprintReadWrite)
+	EAIDifficulty AIDifficulty;
 
 private:
 	EAppState AppState = EAppState::Loading;

@@ -23,17 +23,11 @@ protected:
 		class UStaticMeshComponent* MainMeshComponent;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 	UFUNCTION(BlueprintCallable)
 		void VerticalMovement(float MovementDelta);
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-		float MovementSpeed = 5.0f;
+		float MovementSpeed = 150.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class UCurveFloat* ReflectionCurve;
@@ -41,11 +35,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		float MaxBounceAngle = 75.0f; //in degrees
 
-	float GetPaddleHeight() { return PaddleHeightHalf * 2.0f; }
+	float GetPaddleHeight() { return PaddleHeight; }
+	float GetPaddleWidth() { return PaddleWidth; }
 
 private:
 	UFUNCTION()
 	void HandleOnComponentHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
-	float PaddleHeightHalf;
+	float PaddleHeight;
+	float PaddleWidth;
 };
