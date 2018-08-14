@@ -8,7 +8,7 @@ public class PongTarget : TargetRules
 	public PongTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Game;
-
-		ExtraModuleNames.AddRange( new string[] { "Pong" } );
+        bForceEnableExceptions = true;
+        ExtraModuleNames.AddRange( new string[] { "Pong" } );
 	}
 }
